@@ -15,10 +15,10 @@
                     <a class="nav-link" href="/jobs">View Jobs</a>
                 </li>
                 <li class="nav-item" sec:authorize="hasRole('CANDIDATE')">
-                    <a class="nav-link" href="/candidates/profile">Update Profile</a>
+                    <a class="nav-link" href="/candidates/updateprofile">Update Profile</a>
                 </li>
                 <li class="nav-item" sec:authorize="hasRole('CANDIDATE')">
-                    <a class="nav-link" href="/match/jobs">Match with Jobs</a>
+                    <a class="nav-link" href="/candidates/recommendations">Match with Jobs</a>
                 </li>
                 <li class="nav-item" sec:authorize="hasRole('EMPLOYER')">
                     <a class="nav-link" href="/jobs/add">Post Job</a>
