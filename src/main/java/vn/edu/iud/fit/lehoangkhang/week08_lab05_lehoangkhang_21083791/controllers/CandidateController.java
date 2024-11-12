@@ -1,15 +1,13 @@
 package vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.controllers;
 
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.enums.SkillLevel;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.Candidate;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.CandidateSkill;
@@ -23,15 +21,19 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Controller
+@RequestMapping("/candidates")
 public class CandidateController {
 
-    @Autowired
-    private CandidateService candidateService;
+    private final CandidateService candidateService;
+    private final SkillService skillService;
 
     @Autowired
-    private SkillService skillService;
+    public CandidateController(CandidateService candidateService, SkillService skillService) {
+        this.candidateService = candidateService;
+        this.skillService = skillService;
+    }
 
-    @GetMapping("/candidates")
+    @GetMapping("")
     public String showCandidateList(
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "30") int size,
@@ -49,9 +51,8 @@ public class CandidateController {
         return "candidates/candidate-list";
     }
 
-
-
-    @GetMapping("/candidates/add")
+//    @PreAuthorize("hasRole('CANDIDATE')")
+    @GetMapping("/add")
     public String showAddCandidateForm(Model model) {
         model.addAttribute("candidate", new Candidate());
 
@@ -63,7 +64,8 @@ public class CandidateController {
         return "candidates/add-candidate";
     }
 
-    @PostMapping("/candidates/add")
+//    @PreAuthorize("hasRole('CANDIDATE')")
+    @PostMapping("/add")
     public String addCandidate(@Valid @ModelAttribute("candidate") Candidate candidate, BindingResult result, Model model) {
         if (result.hasErrors()) {
             model.addAttribute("skills", skillService.getAllSkills());
@@ -72,7 +74,6 @@ public class CandidateController {
         }
 
         if (candidate.getCandidateSkills() != null) {
-            System.out.printf("Candidate is null");
             for (CandidateSkill skill : candidate.getCandidateSkills()) {
                 skill.setCandidate(candidate);
             }
@@ -80,8 +81,6 @@ public class CandidateController {
 
         if (candidate.getExperiences() != null) {
             for (Experience experience : candidate.getExperiences()) {
-                System.out.println("From date: " + experience.getFromDate());
-                System.out.println("To date: " + experience.getToDate());
                 experience.setCandidate(candidate);
             }
         }
@@ -89,7 +88,4 @@ public class CandidateController {
         candidateService.saveCandidate(candidate);
         return "redirect:/candidates";
     }
-
-
 }
-
