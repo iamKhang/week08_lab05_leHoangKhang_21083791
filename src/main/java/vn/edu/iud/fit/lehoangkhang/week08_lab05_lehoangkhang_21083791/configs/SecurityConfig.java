@@ -2,15 +2,15 @@ package vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.configs;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.services.CustomUserDetailsService;
 
 @Configuration
@@ -41,12 +41,13 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**", "/", "fontawesome/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/jobs").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/candidates").permitAll()
-                        .requestMatchers("/jobs/**").hasRole("EMPLOYER")
-                        .requestMatchers("/candidates/**").hasRole("CANDIDATE")
-                        .anyRequest().authenticated()
+                        // .requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**", "/", "fontawesome/**").permitAll()
+                        // .requestMatchers(HttpMethod.GET, "/jobs").permitAll()
+                        // .requestMatchers(HttpMethod.GET, "/jobs/**").permitAll()
+                        // .requestMatchers(HttpMethod.GET, "/candidates").permitAll()
+                        // .requestMatchers("/candidates/**").hasRole("CANDIDATE")
+                        // .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 .formLogin((form) -> form
                         .loginPage("/login")

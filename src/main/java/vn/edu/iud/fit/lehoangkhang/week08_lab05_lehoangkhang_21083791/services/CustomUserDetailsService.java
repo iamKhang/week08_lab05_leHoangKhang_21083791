@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.Account;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.repositories.AccountRepository;
+import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.CustomUserDetails;
 
 import java.util.Collections;
 import java.util.List;
@@ -28,10 +29,11 @@ public class CustomUserDetailsService implements UserDetailsService {
         );
 
         // Chuyển đổi thành đối tượng UserDetails
-        return new org.springframework.security.core.userdetails.User(
+        return new CustomUserDetails(
                 account.getCandidate().getPhone(),
                 account.getPassword(),
-                authorities
+                authorities,
+                account.getCandidate().getFullName()
         );
     }
 }

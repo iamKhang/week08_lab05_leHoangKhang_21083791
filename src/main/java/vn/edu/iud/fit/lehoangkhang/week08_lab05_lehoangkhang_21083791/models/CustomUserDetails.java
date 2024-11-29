@@ -15,6 +15,11 @@ public class CustomUserDetails extends User {
         this.fullName = fullName;
     }
 
+    @Override
+    public String toString() {
+        return this.fullName;
+    }
+
     public String getFullName() {
         return fullName;
     }
