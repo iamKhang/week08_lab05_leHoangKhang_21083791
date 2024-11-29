@@ -1,80 +1,86 @@
 package vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.controllers;
 
-import org.springframework.data.domain.Page;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.enums.SkillLevel;
-import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.Company;
-import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.Job;
-import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.JobSkill;
-import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.Skill;
-import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.services.JobService;
-import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.services.CompanyService;
-import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.services.SkillService;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.Job;
+import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.services.JobService;
+import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.services.JobApplicationService;
+import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.services.CandidateService;
+
+import java.security.Principal;
+
+import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.Candidate;
 
 @Controller
 @RequestMapping("/jobs")
 public class JobController {
+
     @Autowired
     private JobService jobService;
+
     @Autowired
-    private CompanyService companyService;
+    private JobApplicationService applicationService;
+    
     @Autowired
-    private SkillService skillService;
+    private CandidateService candidateService;
 
     @GetMapping("")
-    public String showJobList(
-            @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
-            Model model) {
-        Page<Job> jobPage = jobService.getJobs(page - 1, size);
-
-        List<Job> jobs = jobPage.getContent();
-        jobs.forEach(job -> {
-            System.out.println(job.getSalaryFrom() + " - " + job.getSalaryTo());
-        });
+    public String showJobList(@RequestParam(value = "page", defaultValue = "0") int page,
+                               @RequestParam(value = "size", defaultValue = "10") int size,
+                               Model model) {
+        Page<Job> jobPage = jobService.getJobs(page, size);
         model.addAttribute("jobPage", jobPage);
-        int totalPages = jobPage.getTotalPages();
-        if (totalPages > 0) {
-            List<Integer> pageNumbers = IntStream.rangeClosed(1, totalPages)
-                    .boxed()
-                    .collect(Collectors.toList());
-            model.addAttribute("pageNumbers", pageNumbers);
-        }
         return "jobs/job-list";
     }
 
-//    @PreAuthorize("hasRole('EMPLOYER')")
-    @GetMapping("/add")
-    public String showAddJobForm(Model model) {
-        Job job = new Job();
-        job.setJobSkills(new ArrayList<>());
-        List<Skill> skills = skillService.getAllSkills();
+    @GetMapping("/{id}")
+    public String getJobDetails(@PathVariable Long id, Model model, Principal principal) {
+        Job job = jobService.getJobById(id)
+            .orElseThrow(() -> new RuntimeException("Job not found with id: " + id));
+        
+        boolean hasApplied = false;
+        if (principal != null) {
+            String phone = principal.getName();
+            Candidate candidate = candidateService.findByPhone(phone);
+            hasApplied = applicationService.hasApplied(candidate, id);
+        }
+        
         model.addAttribute("job", job);
-        model.addAttribute("skills", skills);
-        model.addAttribute("skillLevels", SkillLevel.values());
-        return "jobs/add-job";
+        model.addAttribute("hasApplied", hasApplied);
+        return "jobs/job-detail";
     }
 
-//    @PreAuthorize("hasRole('EMPLOYER')")
-    @PostMapping("/add")
-    public String addJob(@ModelAttribute Job job) {
-        Company company = companyService.findById(1L); // Default to company with ID 1
-        job.setCompany(company);
-
-        List<JobSkill> jobSkills = job.getJobSkills();
-        for (JobSkill jobSkill : jobSkills) {
-            jobSkill.setJob(job);
+    @PostMapping("/{id}/apply")
+    public String applyForJob(@PathVariable Long id, Principal principal, RedirectAttributes redirectAttributes) {
+        if (principal == null) {
+            // Lưu URL hiện tại vào session để redirect sau khi đăng nhập
+            return "redirect:/login";
         }
-        jobService.addJob(job);
-        return "redirect:/jobs";
+
+        try {
+            String phone = principal.getName();
+            Candidate candidate = candidateService.findByPhone(phone);
+            
+            boolean success = applicationService.applyForJob(candidate, id);
+            
+            if (success) {
+                redirectAttributes.addFlashAttribute("successMessage", "Ứng tuyển thành công!");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "Bạn đã ứng tuyển công việc này rồi!");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi xảy ra khi ứng tuyển!");
+        }
+        
+        return "redirect:/jobs/" + id;
     }
 }
