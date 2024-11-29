@@ -31,7 +31,6 @@ public class Job {
     @OneToMany(mappedBy = "job", cascade = CascadeType.ALL)
     private List<JobSkill> jobSkills;
     private LocalDate deadline;
-
     private boolean active;
     @Column(name = "number_of_applicants")
     private int numberOfApplicants;
@@ -42,9 +41,6 @@ public class Job {
     private double salaryTo;
     @Column(name = "required_experience_years")
     private int requiredExperienceYears;
-    @ElementCollection
-    @CollectionTable(name = "required_skills", joinColumns = @JoinColumn(name = "job_id"))
-    private Set<ProgramSkillType> requiredSkills;
     @Enumerated(EnumType.STRING)
     private JobType type;
 

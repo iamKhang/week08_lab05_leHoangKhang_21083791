@@ -15,7 +15,7 @@ import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.Can
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.CandidateSkill;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.Experience;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.services.CandidateService;
-import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.services.RecommendationService;
+import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.services.JobMatchingService;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.services.SkillService;
 
 import java.security.Principal;
@@ -29,13 +29,13 @@ public class CandidateController {
 
     private final CandidateService candidateService;
     private final SkillService skillService;
-    private final RecommendationService recommendationService;
+    private final JobMatchingService jobMatchingService;
 
     @Autowired
-    public CandidateController(CandidateService candidateService, SkillService skillService, RecommendationService recommendationService) {
+    public CandidateController(CandidateService candidateService, SkillService skillService, JobMatchingService jobMatchingService) {
         this.candidateService = candidateService;
         this.skillService = skillService;
-        this.recommendationService = recommendationService;
+        this.jobMatchingService = jobMatchingService;
     }
 
     @GetMapping("")
@@ -117,19 +117,32 @@ public class CandidateController {
         return "redirect:/candidates";
     }
 
-    @PreAuthorize("hasRole('CANDIDATE')")
     @GetMapping("/recommendations")
     public String showJobRecommendations(Model model, Principal principal) {
+        // Lấy số điện thoại của ứng viên từ thông tin đăng nhập
         String phone = principal.getName();
         System.out.println("Phone: " + phone);
+
+        // Tìm ứng viên dựa trên số điện thoại
         Candidate candidate = candidateService.findByPhone(phone);
         if (candidate == null) {
             return "redirect:/candidates";
         }
 
-        List<RecommendationService.JobRecommendation> recommendations = recommendationService.recommendJobsForCandidate(candidate.getId());
+        // Match các công việc phù hợp với ứng viên
+        List<JobMatchingService.JobRecommendation> recommendations = jobMatchingService.matchCandidateWithJobs(candidate);
+
+        // Log thông tin gợi ý
         recommendations.forEach(r -> System.out.println(r.getJob().getName() + ": " + r.getScore()));
-        recommendations.forEach(r -> r.setScore(r.getScore() * 100));
+
+        // Cân nhắc điều chỉnh điểm số nếu cần (ví dụ: nhân với 100)
+        recommendations.forEach(r -> {
+            // Nếu muốn điều chỉnh điểm số
+            // r.setScore(r.getScore() * 100);
+            // Trong trường hợp này, để giữ nguyên điểm gốc
+        });
+
+        // Gửi dữ liệu xuống giao diện
         model.addAttribute("recommendations", recommendations);
         return "candidates/job-recommentdations";
     }

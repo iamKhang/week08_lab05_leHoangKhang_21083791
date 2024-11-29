@@ -2,45 +2,156 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Statistics</title>
+    <div th:replace="fragments/header :: header"></div>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Loại bỏ giới hạn max-width và sử dụng chiều rộng 100% */
+        #agePieChart, #genderChart, #jobTypeChart {
+            width: 100% !important;
+            height: 400px !important; /* Đặt chiều cao cụ thể */
+            margin: 0 auto;
+        }
+
+        /* Đảm bảo canvas chiếm toàn bộ không gian của container */
+        .card-body {
+            position: relative;
+            height: 100%;
+        }
+
+        /* Đặt chiều cao tối đa cho biểu đồ */
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* Tùy chỉnh kích thước container cho các biểu đồ cột */
+        @media (min-width: 768px) {
+            .chart-container {
+                width: 100%;
+                margin: 0 auto;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .chart-container {
+                width: 100%;
+                margin: 0 auto;
+            }
+        }
+
+        /* Điều chỉnh khoảng cách giữa các biểu đồ khi nằm cạnh nhau */
+        .statistics-row {
+            margin-bottom: 2rem;
+        }
+    </style>
 </head>
-<body>
-<h1>Thống Kê Tuyển Dụng</h1>
+<body class="bg-light">
 
-<!-- Check if topSkills has data -->
-<div th:if="${topSkills != null && !topSkills.isEmpty()}" class="flex">
-    <div th:each="entry : ${topSkills}">
-        <h2 th:text="${entry.key}">Skill Type</h2>
-<!--        <ul>-->
-<!--            <li th:each="skill : ${entry.value}">-->
-<!--                <span th:text="${skill['skillName']}">Skill Name</span> - -->
-<!--                <span th:text="${skill['count']}">Count</span>-->
-<!--            </li>-->
-<!--        </ul>-->
-        <!-- Add a canvas for each skill type chart -->
-        <canvas th:attr="id=${entry.key + 'Chart'}" width="400" height="200"></canvas>
+<div class="container py-5">
+    <h1 class="text-center mb-5 text-primary">Thống Kê Tuyển Dụng</h1>
+
+    <!-- Thống Kê Top Skills -->
+    <div th:if="${topSkills != null && !topSkills.isEmpty()}" class="row g-4">
+        <div th:each="entry : ${topSkills}" class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h2 class="card-title text-secondary text-center" th:text="${entry.key}">Skill Type</h2>
+                    <!-- Canvas for chart -->
+                    <div class="chart-container">
+                        <canvas th:attr="id=${entry.key + 'Chart'}"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- Message if no data is available -->
+    <div th:if="${topSkills == null || topSkills.isEmpty()}" class="text-center text-muted">
+        <p>Không có dữ liệu thống kê.</p>
+    </div>
+
+    <!-- Thống Kê Công Việc Theo Loại (Top 14) -->
+    <h1 class="text-center my-5 text-warning">Thống Kê Công Việc Theo Loại (Top 14)</h1>
+    <div class="card shadow-sm border-0 mb-5">
+        <div class="card-body text-center">
+            <div class="chart-container">
+                <canvas id="jobTypeChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="row statistics-row">
+        <!-- Thống Kê Độ Tuổi Ứng Viên -->
+        <div class="col-md-6 mb-4">
+            <h1 class="text-center my-3 text-success">Thống Kê Ứng Viên Theo Độ Tuổi</h1>
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <div class="chart-container">
+                        <canvas id="agePieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thống Kê Giới Tính Ứng Viên -->
+        <div class="col-md-6 mb-4">
+            <h1 class="text-center my-3 text-info">Thống Kê Ứng Viên Theo Giới Tính</h1>
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <div class="chart-container">
+                        <canvas id="genderChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 </div>
+<div th:replace="fragments/footer :: footer"></div>
 
-<!-- Message if no data is available -->
-<div th:if="${topSkills == null || topSkills.isEmpty()}">
-    <p>No data available for statistics.</p>
-</div>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<h1>Thống Kê Ứng Viên Theo Độ Tuổi</h1>
-
-<div>
-    <canvas id="agePieChart"></canvas>
-</div>
-
-<h1>Thống Kê Ứng Viên Theo Giới Tính</h1>
-
-<canvas id="genderChart" width="400" height="400"></canvas>
-
-<!-- JavaScript to render charts -->
 <script th:inline="javascript">
     // Dữ liệu cho biểu đồ kỹ năng (topSkillsData)
     const topSkillsData = /*[[${topSkills}]]*/ {};
+
+    // Màu sắc cho biểu đồ cột
+    const colors = [
+        'rgba(255, 99, 132, 0.6)',
+        'rgba(54, 162, 235, 0.6)',
+        'rgba(255, 206, 86, 0.6)',
+        'rgba(75, 192, 192, 0.6)',
+        'rgba(153, 102, 255, 0.6)',
+        'rgba(255, 159, 64, 0.6)',
+        'rgba(199, 199, 199, 0.6)',
+        'rgba(83, 102, 255, 0.6)',
+        'rgba(255, 99, 71, 0.6)',
+        'rgba(60, 179, 113, 0.6)',
+        'rgba(106, 90, 205, 0.6)',
+        'rgba(255, 215, 0, 0.6)',
+        'rgba(100, 149, 237, 0.6)',
+        'rgba(220, 20, 60, 0.6)'
+    ];
+    const borderColors = [
+        'rgba(255, 99, 132, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(153, 102, 255, 1)',
+        'rgba(255, 159, 64, 1)',
+        'rgba(199, 199, 199, 1)',
+        'rgba(83, 102, 255, 1)',
+        'rgba(255, 99, 71, 1)',
+        'rgba(60, 179, 113, 1)',
+        'rgba(106, 90, 205, 1)',
+        'rgba(255, 215, 0, 1)',
+        'rgba(100, 149, 237, 1)',
+        'rgba(220, 20, 60, 1)'
+    ];
 
     // Loop qua từng loại kỹ năng để tạo biểu đồ cho từng loại kỹ năng
     Object.keys(topSkillsData).forEach(skillType => {
@@ -59,15 +170,17 @@
                     label: skillType + ' Skills',
                     data: data,
                     borderWidth: 1,
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)'
+                    backgroundColor: colors.slice(0, data.length),
+                    borderColor: borderColors.slice(0, data.length)
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false, // Cho phép biểu đồ linh hoạt theo container
                 scales: {
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        precision: 0
                     }
                 }
             }
@@ -87,23 +200,14 @@
             datasets: [{
                 label: 'Ứng viên theo độ tuổi',
                 data: ageCounts,
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.6)',
-                    'rgba(54, 162, 235, 0.6)',
-                    'rgba(255, 206, 86, 0.6)',
-                    'rgba(75, 192, 192, 0.6)'
-                ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)'
-                ],
+                backgroundColor: colors.slice(0, ageCounts.length),
+                borderColor: borderColors.slice(0, ageCounts.length),
                 borderWidth: 1
             }]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false, // Cho phép biểu đồ linh hoạt theo container
             plugins: {
                 legend: {
                     position: 'top',
@@ -133,12 +237,14 @@
                 datasets: [{
                     label: 'Số lượng ứng viên theo giới tính',
                     data: genderCounts,
-                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+                    backgroundColor: colors.slice(0, genderCounts.length),
+                    borderColor: borderColors.slice(0, genderCounts.length),
                     hoverOffset: 4
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false, // Cho phép biểu đồ linh hoạt theo container
                 plugins: {
                     legend: {
                         position: 'top',
@@ -156,8 +262,54 @@
     } else {
         console.error("No gender data available for the gender chart.");
     }
-</script>
 
+    // Dữ liệu cho biểu đồ JobType (Bar Chart)
+    const jobTypeData = /*[[${jobTypeData}]]*/ {};
+    const jobTypeLabels = Object.keys(jobTypeData);
+    const jobTypeCounts = Object.values(jobTypeData);
+
+    // Kiểm tra dữ liệu có tồn tại trước khi vẽ
+    if (jobTypeLabels.length > 0) {
+        const jobTypeCtx = document.getElementById('jobTypeChart').getContext('2d');
+        new Chart(jobTypeCtx, {
+            type: 'bar', // Sử dụng biểu đồ cột
+            data: {
+                labels: jobTypeLabels,
+                datasets: [{
+                    label: 'Số lượng công việc theo loại',
+                    data: jobTypeCounts,
+                    backgroundColor: colors.slice(0, jobTypeCounts.length),
+                    borderColor: borderColors.slice(0, jobTypeCounts.length),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, // Cho phép biểu đồ linh hoạt theo container
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        precision: 0
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false, // Ẩn chú giải nếu không cần
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.raw;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    } else {
+        console.error("No job type data available for the job type chart.");
+    }
+</script>
 
 </body>
 </html>

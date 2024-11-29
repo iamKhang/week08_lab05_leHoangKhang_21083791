@@ -3,6 +3,7 @@ package vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+
 import org.antlr.v4.runtime.misc.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -10,6 +11,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
+
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.dtos.*;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.enums.AccountRole;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.enums.SkillLevel;
@@ -22,6 +24,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.enums.JobType;
 
 @SpringBootApplication
 public class Week08Lab05LeHoangKhang21083791Application {
@@ -129,6 +133,7 @@ public class Week08Lab05LeHoangKhang21083791Application {
                         job.setSalaryFrom(jobDTO.getSalaryFrom());
                         job.setSalaryTo(jobDTO.getSalaryTo());
                         job.setRequiredExperienceYears(jobDTO.getRequiredExperienceYears());
+                        job.setType(JobType.valueOf(jobDTO.getType()));
 
                         List<JobSkill> jobSkills = new ArrayList<>();
                         // Lưu JobSkills
@@ -145,6 +150,7 @@ public class Week08Lab05LeHoangKhang21083791Application {
                         job.setJobSkills(jobSkills);
 
                         // Lưu Job cùng với JobSkills
+                        System.out.println("Save job: " + job.getName());
                         jobRepository.save(job);
                     }
                     System.out.println("Jobs and JobSkills data initialized.");
