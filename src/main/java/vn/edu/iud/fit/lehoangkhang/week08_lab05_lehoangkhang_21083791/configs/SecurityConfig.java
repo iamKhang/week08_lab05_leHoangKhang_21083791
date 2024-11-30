@@ -41,22 +41,20 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests((authorize) -> authorize
-                        // .requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**", "/", "fontawesome/**").permitAll()
-                        // .requestMatchers(HttpMethod.GET, "/jobs").permitAll()
-                        // .requestMatchers(HttpMethod.GET, "/jobs/**").permitAll()
-                        // .requestMatchers(HttpMethod.GET, "/candidates").permitAll()
-                        // .requestMatchers("/candidates/**").hasRole("CANDIDATE")
-                        // .anyRequest().authenticated()
+                        .requestMatchers("/register/**", "/login", "/css/**", "/js/**", "/", "/jobs", "/jobs/*").permitAll()
+                        // .requestMatchers("/candidates/updateprofile", "/candidates/recommendations").hasRole("CANDIDATE")
+                        // .requestMatchers("/employer/**", "/jobs/add").hasRole("EMPLOYER")
                         .anyRequest().permitAll()
+                        // .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form
                         .loginPage("/login")
-                        .usernameParameter("phone")
-                        .defaultSuccessUrl("/", true)
+                        .usernameParameter("username")
+                        .passwordParameter("password")
+                        .defaultSuccessUrl("/")
                         .permitAll()
                 )
                 .logout((logout) -> logout
-                        .logoutSuccessUrl("/login?logout")
                         .permitAll()
                 )
                 .authenticationProvider(authenticationProvider());

@@ -11,9 +11,11 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.enums.SkillLevel;
+import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.Account;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.Candidate;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.CandidateSkill;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.Experience;
+import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.services.AccountService;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.services.CandidateService;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.services.JobMatchingService;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.services.SkillService;
@@ -30,6 +32,9 @@ public class CandidateController {
     private final CandidateService candidateService;
     private final SkillService skillService;
     private final JobMatchingService jobMatchingService;
+
+    @Autowired
+    private AccountService accountService;
 
     @Autowired
     public CandidateController(CandidateService candidateService, SkillService skillService, JobMatchingService jobMatchingService) {
@@ -59,8 +64,7 @@ public class CandidateController {
     @PreAuthorize("hasRole('CANDIDATE')")
     @GetMapping("/updateprofile")
     public String showUpdateProfileForm(Model model, Principal principal) {
-        String phone = principal.getName(); // Giả sử phone là username
-        Candidate candidate = candidateService.findByPhone(phone);
+        Candidate candidate = candidateService.findByEmail(principal.getName());
         if (candidate == null) {
             return "redirect:/candidates";
         }
@@ -80,8 +84,11 @@ public class CandidateController {
             return "candidates/update-profile";
         }
 
-        String phone = principal.getName();
-        Candidate existingCandidate = candidateService.findByPhone(phone);
+        String email = principal.getName();
+        Account existingAccount = accountService.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+            
+        Candidate existingCandidate = existingAccount.getCandidate();
         if (existingCandidate == null) {
             return "redirect:/candidates";
         }
@@ -119,30 +126,16 @@ public class CandidateController {
 
     @GetMapping("/recommendations")
     public String showJobRecommendations(Model model, Principal principal) {
-        // Lấy số điện thoại của ứng viên từ thông tin đăng nhập
-        String phone = principal.getName();
-        System.out.println("Phone: " + phone);
-
-        // Tìm ứng viên dựa trên số điện thoại
-        Candidate candidate = candidateService.findByPhone(phone);
+        // Lấy candidate từ email đăng nhập
+        Candidate candidate = candidateService.findByEmail(principal.getName());
         if (candidate == null) {
             return "redirect:/candidates";
         }
 
         // Match các công việc phù hợp với ứng viên
-        List<JobMatchingService.JobRecommendation> recommendations = jobMatchingService.matchCandidateWithJobs(candidate);
+        List<JobMatchingService.JobRecommendation> recommendations = 
+            jobMatchingService.matchCandidateWithJobs(candidate);
 
-        // Log thông tin gợi ý
-        recommendations.forEach(r -> System.out.println(r.getJob().getName() + ": " + r.getScore()));
-
-        // Cân nhắc điều chỉnh điểm số nếu cần (ví dụ: nhân với 100)
-        recommendations.forEach(r -> {
-            // Nếu muốn điều chỉnh điểm số
-            // r.setScore(r.getScore() * 100);
-            // Trong trường hợp này, để giữ nguyên điểm gốc
-        });
-
-        // Gửi dữ liệu xuống giao diện
         model.addAttribute("recommendations", recommendations);
         return "candidates/job-recommentdations";
     }

@@ -35,7 +35,7 @@ public class Company {
     private String phone;
     @Column(columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
     private String webUrl;
-    @Column(columnDefinition = "VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
+    @Column(name = "logo_url")
     private String logoUrl;
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "address_id")
