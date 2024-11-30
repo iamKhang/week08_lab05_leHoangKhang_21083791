@@ -16,4 +16,5 @@ public interface JobRepository extends JpaRepository<Job, Long> {
             "LEFT JOIN FETCH js.skill " +
             "WHERE j.active = true")
     List<Job> findAllActiveJobsWithSkills();
+    List<Job> findTop4ByActiveOrderByStartDateDesc(boolean active);
 }
