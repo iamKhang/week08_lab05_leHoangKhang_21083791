@@ -5,65 +5,180 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Danh sách công việc</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
     <style>
-        /* Tùy chỉnh thêm nếu cần */
-        .pagination li a {
-            cursor: pointer;
+        .job-card {
+            transition: transform 0.2s;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        
+        .job-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
-        .required::after {
-            content: "*";
-            color: red;
-            margin-left: 2px;
+        .company-logo {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .job-title {
+            color: #2d2d2d;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .company-name {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .job-meta {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .job-meta i {
+            width: 20px;
+            color: #888;
+        }
+
+        .salary-tag {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .deadline-tag {
+            background-color: #fff3e0;
+            color: #ef6c00;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .pagination {
+            margin-top: 2rem;
+        }
+
+        .filter-section {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
         }
     </style>
 </head>
 <body>
-<!-- Header -->
 <div th:replace="fragments/header :: header"></div>
 
-<!-- Nội dung chính -->
 <div class="container mt-5">
-    <h2 class="text-center">Danh sách công việc</h2>
-    <div class="table-responsive">
-        <table class="table table-striped table-bordered">
-            <thead class="table-dark">
-                <tr>
-                    <th>ID</th>
-                    <th>Tên công việc</th>
-                    <th>Mô tả</th>
-                    <th>Công ty</th>
-                    <th>Hạn nộp hồ sơ</th>
-                    <th>Chi tiết</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="job : ${jobPage.content}">
-                    <td th:text="${job.id}"></td>
-                    <td th:text="${job.name}"></td>
-                    <td th:text="${job.description}"></td>
-                    <td th:text="${job.company.name}"></td>
-                    <td th:text="${#temporals.format(job.deadline, 'dd/MM/yyyy')}"></td>
-                    <td>
-                        <a th:href="@{/jobs/{id}(id=${job.id})}" class="btn btn-primary">Xem chi tiết</a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+    <!-- Phần tìm kiếm và lọc -->
+    <div class="filter-section mb-4">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <input type="text" class="form-control" placeholder="Tìm kiếm công việc...">
+            </div>
+            <div class="col-md-3">
+                <select class="form-select">
+                    <option value="">Tất cả địa điểm</option>
+                    <option>Hà Nội</option>
+                    <option>TP.HCM</option>
+                    <option>Đà Nẵng</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select">
+                    <option value="">Tất cả ngành nghề</option>
+                    <option>IT - Phần mềm</option>
+                    <option>Marketing</option>
+                    <option>Kế toán</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100">Tìm kiếm</button>
+            </div>
+        </div>
     </div>
 
-    <nav aria-label="Page navigation">
+    <!-- Danh sách công việc -->
+    <div class="row g-4">
+        <div class="col-md-6" th:each="job : ${jobPage.content}">
+            <div class="job-card p-4 h-100">
+                <div class="d-flex">
+                    <!-- Logo công ty -->
+                    <img th:src="${job.company.logoUrl}" 
+                         th:onerror="this.src='https://placehold.co/80x80/e0e0e0/666666?text=' + ${#strings.substring(job.company.name,0,2)}"
+                         class="company-logo me-3" 
+                         th:alt="${job.company.name + ' logo'}"/>
+                    
+                    <!-- Thông tin công việc -->
+                    <div class="flex-grow-1">
+                        <h5 class="job-title" th:text="${job.name}">Job Title</h5>
+                        <p class="company-name mb-2" th:text="${job.company.name}">Company Name</p>
+                        
+                        <!-- Meta info -->
+                        <div class="job-meta mb-3">
+                            <div class="mb-1">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span th:text="${job.company.address.city}">Location</span>
+                            </div>
+                            <div class="mb-1">
+                                <i class="fas fa-briefcase"></i>
+                                <span th:text="${job.type}">Job Type</span>
+                            </div>
+                            <div>
+                                <i class="fas fa-user-graduate"></i>
+                                <span th:text="${job.requiredExperienceYears + ' năm kinh nghiệm'}">Experience</span>
+                            </div>
+                        </div>
+
+                        <!-- Tags -->
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="salary-tag" th:if="${!job.negotiable}" 
+                                  th:text="${#numbers.formatDecimal(job.salaryFrom/1000000, 0, 'COMMA', 0, 'POINT')} + 'M - ' + 
+                                          ${#numbers.formatDecimal(job.salaryTo/1000000, 0, 'COMMA', 0, 'POINT')} + 'M'">
+                                Salary
+                            </span>
+                            <span class="salary-tag" th:if="${job.negotiable}">Thương lượng</span>
+                            <span class="deadline-tag" 
+                                  th:text="'Hết hạn: ' + ${#temporals.format(job.deadline, 'dd/MM/yyyy')}">
+                                Deadline
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Nút xem chi tiết -->
+                    <div class="ms-3 d-flex align-items-center">
+                        <a th:href="@{/jobs/{id}(id=${job.id})}" class="btn btn-outline-primary">Xem chi tiết</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Phân trang -->
+    <nav aria-label="Page navigation" class="mt-4">
         <ul class="pagination justify-content-center">
             <li class="page-item" th:classappend="${jobPage.hasPrevious()} ? '' : 'disabled'">
                 <a class="page-link" th:href="@{/jobs(page=${jobPage.number - 1}, size=${jobPage.size})}" aria-label="Previous">
                     <span aria-hidden="true">&laquo; Previous</span>
                 </a>
             </li>
-            <li class="page-item" th:each="pageNum : ${#numbers.sequence(0, jobPage.totalPages - 1)}" th:classappend="${pageNum == jobPage.number} ? 'active'">
-                <a class="page-link" th:href="@{/jobs(page=${pageNum}, size=${jobPage.size})}" th:text="${pageNum + 1}"></a>
+            <li class="page-item" th:each="pageNum : ${#numbers.sequence(0, jobPage.totalPages - 1)}" 
+                th:classappend="${pageNum == jobPage.number} ? 'active'">
+                <a class="page-link" th:href="@{/jobs(page=${pageNum}, size=${jobPage.size})}" 
+                   th:text="${pageNum + 1}"></a>
             </li>
             <li class="page-item" th:classappend="${jobPage.hasNext()} ? '' : 'disabled'">
-                <a class="page-link" th:href="@{/jobs(page=${jobPage.number + 1}, size=${jobPage.size})}" aria-label="Next">
+                <a class="page-link" th:href="@{/jobs(page=${jobPage.number + 1}, size=${jobPage.size})}" 
+                   aria-label="Next">
                     <span aria-hidden="true">Next &raquo;</span>
                 </a>
             </li>

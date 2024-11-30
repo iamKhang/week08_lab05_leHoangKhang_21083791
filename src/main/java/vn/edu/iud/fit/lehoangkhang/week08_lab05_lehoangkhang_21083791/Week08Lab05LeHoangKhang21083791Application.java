@@ -95,8 +95,14 @@ public class Week08Lab05LeHoangKhang21083791Application {
                         address.setZipcode(companyDTO.getAddress().getZipcode());
 
                         // Tạo Company và thiết lập mối quan hệ
-                        Company company = new Company(companyDTO.getName(), companyDTO.getAbout(),
-                                companyDTO.getEmail(), companyDTO.getPhone(), companyDTO.getWebUrl());
+                        Company company = new Company(
+                            companyDTO.getName(), 
+                            companyDTO.getAbout(),
+                            companyDTO.getEmail(), 
+                            companyDTO.getPhone(), 
+                            companyDTO.getWebUrl(),
+                            companyDTO.getLogoUrl()
+                        );
                         company.setAddress(address);
                         address.setCompany(company); // Thiết lập mối quan hệ ngược lại nếu cần
 
