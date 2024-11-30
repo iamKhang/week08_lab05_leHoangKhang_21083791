@@ -21,7 +21,9 @@ import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.repositori
 
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -260,6 +262,44 @@ public class Week08Lab05LeHoangKhang21083791Application {
             }
 
             System.out.println("Dữ liệu đã được khởi tạo thành công.");
+        };
+    }
+
+    @Bean
+    CommandLineRunner updateJobStartDates() {
+        return args -> {
+            // Chỉ cập nhật nếu chưa có startDate
+            List<Job> jobs = jobRepository.findAll();
+            if (jobs.stream().anyMatch(job -> job.getStartDate() == null)) {
+                Random random = new Random();
+                
+                // Tạo danh sách các tháng trong năm 2024
+                List<Month> months2024 = Arrays.asList(Month.values());
+                int monthIndex = 0;
+
+                for (Job job : jobs) {
+                    if (job.getStartDate() == null) {
+                        // Lấy deadline của job
+                        LocalDate deadline = job.getDeadline();
+                        
+                        // Tạo ngày bắt đầu trong năm 2024
+                        LocalDate startDate = LocalDate.of(2024, 
+                            months2024.get(monthIndex % 12).getValue(), // Phân bố đều các tháng
+                            random.nextInt(20) + 1); // Ngày 1-20 của tháng
+                        
+                        // Đảm bảo startDate trước deadline ít nhất 1 tháng
+                        if (startDate.plusMonths(1).isAfter(deadline)) {
+                            startDate = deadline.minusMonths(1).minusDays(random.nextInt(10)); // Trừ thêm 0-9 ngày cho đa dạng
+                        }
+                        
+                        job.setStartDate(startDate);
+                        jobRepository.save(job);
+                        
+                        monthIndex++; // Tăng index để phân bố đều các tháng
+                    }
+                }
+                System.out.println("Job start dates have been updated.");
+            }
         };
     }
 

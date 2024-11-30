@@ -14,7 +14,9 @@ import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.repositori
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.repositories.JobSkillRepository;
 
 import java.math.BigInteger;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -98,6 +100,20 @@ public class StatisticsController {
 
         model.addAttribute("jobTypeData", jobTypeData);
 
+        // Thêm thống kê xu hướng tuyển dụng theo thời gian
+        List<Object[]> jobPostings = jobRepository.findAll().stream()
+            .sorted((j1, j2) -> j1.getStartDate().compareTo(j2.getStartDate()))
+            .collect(Collectors.groupingBy(
+                job -> job.getStartDate().format(DateTimeFormatter.ofPattern("MM/yyyy")),
+                LinkedHashMap::new,
+                Collectors.counting()
+            ))
+            .entrySet().stream()
+            .map(entry -> new Object[]{entry.getKey(), entry.getValue()})
+            .collect(Collectors.toList());
+
+        model.addAttribute("jobPostingTrends", jobPostings);
+        
         return "statistic";
     }
 }
