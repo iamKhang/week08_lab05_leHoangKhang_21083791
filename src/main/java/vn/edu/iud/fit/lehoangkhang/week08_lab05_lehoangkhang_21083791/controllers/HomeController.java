@@ -1,6 +1,8 @@
 package vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,40 +33,22 @@ public class HomeController {
 
     @GetMapping("/")
     public String home(Model model, Principal principal) {
-        List<Job> recentJobs;
-        
+        // Kiểm tra nếu user đã đăng nhập
         if (principal != null) {
-            // Nếu user đã đăng nhập, lấy các công việc phù hợp nhất
-            String phone = principal.getName();
-            Candidate candidate = candidateService.findByPhone(phone);
+            // Lấy thông tin authentication
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             
-            if (candidate != null) {
-                // Lấy danh sách gợi ý việc làm và sắp xếp theo điểm số
-                List<JobMatchingService.JobRecommendation> recommendations = 
-                    jobMatchingService.matchCandidateWithJobs(candidate);
-                
-                // Lấy 4 công việc có điểm cao nhất và mới nhất
-                recentJobs = recommendations.stream()
-                    .sorted(Comparator
-                        .comparing(JobMatchingService.JobRecommendation::getScore).reversed()
-                        .thenComparing(r -> r.getJob().getStartDate(), Comparator.reverseOrder()))
-                    .limit(4)
-                    .map(JobMatchingService.JobRecommendation::getJob)
-                    .collect(Collectors.toList());
-            } else {
-                // Fallback nếu không tìm thấy candidate
-                recentJobs = getRecentActiveJobs();
+            // Kiểm tra role
+            if (auth.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_EMPLOYER"))) {
+                // Nếu là nhà tuyển dụng, chuyển đến dashboard
+                return "redirect:/employer/dashboard";
             }
-        } else {
-            // Nếu chưa đăng nhập, chỉ lấy công việc mới nhất
-            recentJobs = getRecentActiveJobs();
         }
 
-        model.addAttribute("recentJobs", recentJobs);
+        // Nếu không phải nhà tuyển dụng hoặc chưa đăng nhập, hiển thị trang chủ bình thường
+        model.addAttribute("topJobs", jobRepository.findTop4ByActiveOrderByStartDateDesc(true));
+        model.addAttribute("jobTypes", jobRepository.countTopJobTypes());
         return "index";
-    }
-
-    private List<Job> getRecentActiveJobs() {
-        return jobRepository.findTop4ByActiveOrderByStartDateDesc(true);
     }
 } 

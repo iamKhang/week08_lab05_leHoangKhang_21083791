@@ -7,12 +7,14 @@ import org.springframework.security.core.userdetails.User;
 
 public class CustomUserDetails extends User {
     private final String fullName;
+    private final String avatarUrl;
+    private final String logoUrl;
 
-
-
-    public CustomUserDetails(String username, String password, Collection<? extends GrantedAuthority> authorities, String fullName) {
+    public CustomUserDetails(String username, String password, Collection<? extends GrantedAuthority> authorities, String fullName, String avatarUrl, String logoUrl) {
         super(username, password, authorities);
         this.fullName = fullName;
+        this.avatarUrl = avatarUrl;
+        this.logoUrl = logoUrl;
     }
 
     @Override
@@ -22,5 +24,13 @@ public class CustomUserDetails extends User {
 
     public String getFullName() {
         return fullName;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public String getLogoUrl() {
+        return logoUrl;
     }
 }

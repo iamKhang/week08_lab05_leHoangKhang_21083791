@@ -26,13 +26,17 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         String displayName;
         String email;
+        String avatarUrl = null;
+        String logoUrl = null;
         
         if (account.getRole() == AccountRole.CANDIDATE && account.getCandidate() != null) {
             displayName = account.getCandidate().getFullName();
             email = account.getCandidate().getEmail();
+            avatarUrl = account.getCandidate().getAvatarUrl();
         } else if (account.getRole() == AccountRole.EMPLOYER && account.getCompany() != null) {
             displayName = account.getCompany().getName();
             email = account.getCompany().getEmail();
+            logoUrl = account.getCompany().getLogoUrl();
         } else {
             throw new UsernameNotFoundException("Tài khoản không hợp lệ");
         }
@@ -45,7 +49,9 @@ public class CustomUserDetailsService implements UserDetailsService {
             email,
             account.getPassword(),
             authorities,
-            displayName
+            displayName,
+            avatarUrl,
+            logoUrl
         );
     }
 }

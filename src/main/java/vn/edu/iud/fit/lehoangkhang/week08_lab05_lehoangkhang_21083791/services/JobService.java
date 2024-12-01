@@ -1,5 +1,6 @@
 package vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.services;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,10 @@ import org.springframework.stereotype.Service;
 
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.Job;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.repositories.JobRepository;
+
+import java.time.LocalDate;
+
+import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.CandidateApplyJob;
 
 @Service
 public class JobService {
@@ -22,5 +27,30 @@ public class JobService {
 
     public Optional<Job> getJobById(Long id) {
         return jobRepository.findById(id);
+    }
+
+    public long countActiveJobsByCompany(Long companyId) {
+        return jobRepository.countByCompanyIdAndActiveTrue(companyId);
+    }
+
+    public long countTotalApplicationsByCompany(Long companyId) {
+        return jobRepository.countTotalApplicationsByCompanyId(companyId);
+    }
+
+    public long countExpiringJobsByCompany(Long companyId) {
+        LocalDate oneWeekFromNow = LocalDate.now().plusDays(7);
+        return jobRepository.countExpiringJobs(companyId, oneWeekFromNow);
+    }
+
+    public List<CandidateApplyJob> getRecentApplicationsByCompany(Long companyId) {
+        return jobRepository.findRecentApplicationsByCompanyId(companyId, PageRequest.of(0, 5));
+    }
+
+    public List<Job> getJobsByCompany(Long companyId) {
+        return jobRepository.findByCompanyId(companyId);
+    }
+
+    public List<CandidateApplyJob> getAllApplicationsByCompany(Long companyId) {
+        return jobRepository.findAllApplicationsByCompanyId(companyId);
     }
 }

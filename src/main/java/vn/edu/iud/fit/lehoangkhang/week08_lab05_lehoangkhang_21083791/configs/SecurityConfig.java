@@ -42,10 +42,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers("/register/**", "/login", "/css/**", "/js/**", "/", "/jobs", "/jobs/*").permitAll()
-                        // .requestMatchers("/candidates/updateprofile", "/candidates/recommendations").hasRole("CANDIDATE")
-                        // .requestMatchers("/employer/**", "/jobs/add").hasRole("EMPLOYER")
+                        .requestMatchers("/candidates/updateprofile").hasRole("CANDIDATE")
                         .anyRequest().permitAll()
-                        // .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form
                         .loginPage("/login")
