@@ -1,15 +1,16 @@
 package vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.repositories;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.Job;
-import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.CandidateApplyJob;
 
-import java.time.LocalDate;
-import java.util.List;
+import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.CandidateApplyJob;
+import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.Job;
 
 @Repository
 public interface JobRepository extends JpaRepository<Job, Long> {
@@ -35,4 +36,9 @@ long countExpiringJobs(@Param("companyId") Long companyId,
     @Query("SELECT a FROM CandidateApplyJob a WHERE a.job.company.id = :companyId " +
            "ORDER BY a.applyDate DESC")
     List<CandidateApplyJob> findAllApplicationsByCompanyId(Long companyId);
+    @Query("SELECT caj FROM CandidateApplyJob caj " +
+           "JOIN FETCH caj.candidate " +
+           "WHERE caj.job.id = :jobId " +
+           "ORDER BY caj.applyDate DESC")
+    List<CandidateApplyJob> findCandidateApplyJobsByJobId(Long jobId);
 }

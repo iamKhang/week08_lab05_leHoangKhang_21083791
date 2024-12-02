@@ -1,5 +1,6 @@
 package vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.services;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -8,12 +9,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.CandidateApplyJob;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.Job;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.repositories.JobRepository;
-
-import java.time.LocalDate;
-
-import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.CandidateApplyJob;
 
 @Service
 public class JobService {
@@ -52,5 +50,13 @@ public class JobService {
 
     public List<CandidateApplyJob> getAllApplicationsByCompany(Long companyId) {
         return jobRepository.findAllApplicationsByCompanyId(companyId);
+    }
+
+    public Job saveJob(Job job) {
+        return jobRepository.save(job);
+    }
+
+    public List<CandidateApplyJob> getApplicationsByJob(Long jobId) {
+        return jobRepository.findCandidateApplyJobsByJobId(jobId);
     }
 }

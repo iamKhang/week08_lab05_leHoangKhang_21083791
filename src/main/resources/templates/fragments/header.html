@@ -175,8 +175,13 @@
                         </a>
                     </li>
                     <li class="nav-item" sec:authorize="hasRole('EMPLOYER')">
-                        <a class="nav-link" href="/jobs/add">
+                        <a class="nav-link" href="/employer/jobs/post">
                             <i class="fas fa-plus-circle me-2"></i>Đăng tuyển
+                        </a>
+                    </li>
+                    <li class="nav-item" sec:authorize="hasRole('EMPLOYER')">
+                        <a class="nav-link" href="/employer/jobs">
+                            <i class="fas fa-briefcase me-2"></i>Quản lý tin tuyển dụng
                         </a>
                     </li>
                     <li class="nav-item">
