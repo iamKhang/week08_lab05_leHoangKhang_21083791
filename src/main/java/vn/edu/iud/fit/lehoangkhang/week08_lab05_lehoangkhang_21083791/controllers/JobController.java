@@ -65,8 +65,8 @@ public class JobController {
         
         boolean hasApplied = false;
         if (principal != null) {
-            String phone = principal.getName();
-            Candidate candidate = candidateService.findByPhone(phone);
+            String email = principal.getName();
+            Candidate candidate = candidateService.findByEmail(email);
             hasApplied = applicationService.hasApplied(candidate, id);
         }
         
@@ -84,7 +84,8 @@ public class JobController {
 
         try {
             String phone = principal.getName();
-            Candidate candidate = candidateService.findByPhone(phone);
+            System.out.println("Phone: "+phone);
+            Candidate candidate = candidateService.findByEmail(phone);
             
             boolean success = applicationService.applyForJob(candidate, id);
             

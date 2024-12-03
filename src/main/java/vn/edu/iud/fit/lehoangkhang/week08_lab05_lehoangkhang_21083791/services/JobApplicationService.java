@@ -24,13 +24,14 @@ public class JobApplicationService {
     @Transactional
     public boolean applyForJob(Candidate candidate, Long jobId) {
         try {
-            // Kiểm tra xem đã ứng tuyển chưa
-            if (applyJobRepository.existsByCandidateAndJobId(candidate, jobId)) {
-                return false;
-            }
-
             Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new RuntimeException("Job not found"));
+            System.out.println("Job: " + job.getId());
+            
+            // Kiểm tra xem đã ứng tuyển chưa
+            if (applyJobRepository.existsByCandidateAndJob(candidate, job)) {
+                return false;
+            }
 
             // Tạo bản ghi ứng tuyển mới
             CandidateApplyJob application = new CandidateApplyJob();
@@ -53,6 +54,17 @@ public class JobApplicationService {
     }
 
     public boolean hasApplied(Candidate candidate, Long jobId) {
-        return applyJobRepository.existsByCandidateAndJobId(candidate, jobId);
+        Job job = jobRepository.findById(jobId)
+            .orElseThrow(() -> new RuntimeException("Job not found"));
+        if (applyJobRepository.existsByCandidateAndJob(candidate, job)) {
+            System.out.println("Candidate: " + candidate.getId());
+            System.out.println("Job: " + job.getId());
+            System.out.println("Has applied");
+        }else {
+            System.out.println("Candidate: " + candidate.getId());
+            System.out.println("Job: " + job.getId());
+            System.out.println("Has not applied");
+        }
+        return applyJobRepository.existsByCandidateAndJob(candidate, job);
     }
 } 
