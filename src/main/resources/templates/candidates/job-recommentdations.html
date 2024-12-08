@@ -3,54 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Job Recommendations</title>
-    <!-- Bootstrap CSS -->
+    <title>Việc làm phù hợp</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        .header h1 {
-            margin: 0;
+        .job-card {
+            transition: transform 0.2s;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 1rem;
         }
-        .table thead th {
-            vertical-align: middle;
-            text-align: center;
+        
+        .job-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-        .table tbody td {
-            vertical-align: middle;
+
+        .company-logo {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .job-title {
+            color: #2d2d2d;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .company-name {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .job-meta {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .job-meta i {
+            width: 20px;
+            color: #888;
+        }
+
+        .match-score {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .deadline-tag {
+            background-color: #fff3e0;
+            color: #ef6c00;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .filter-section {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .skill-badge {
+            background: #f1f3f4;
+            color: #444;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin: 0.25rem;
+            display: inline-block;
         }
     </style>
 </head>
-<body>
-<!-- Header -->
-<div th:replace="fragments/header :: header"></div>
-<!-- Nội dung chính -->
-<div class="container mt-5">
-    <h2 class="mb-4 text-center">Job Recommendations</h2>
-    <div class="table-responsive">
-        <table class="table table-striped table-hover table-bordered">
-            <thead class="table-dark">
-            <tr>
-                <th scope="col">Job Name</th>
-                <th scope="col">Description</th>
-                <th scope="col">Company</th>
-                <th scope="col">Score</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="recommendation : ${recommendations}">
-                <td th:text="${recommendation.job.name}">Job Name</td>
-                <td th:text="${recommendation.job.description}">Job Description</td>
-                <td th:text="${recommendation.job.company.name}">Company Name</td>
-                <td th:text="${recommendation.score}">Score</td>
-            </tr>
-            </tbody>
-        </table>
+<body class="bg-light">
+    <div th:replace="fragments/header :: header"></div>
+
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Việc làm phù hợp với bạn</h2>
+        </div>
+
+        <div th:if="${#lists.isEmpty(recommendations)}" class="text-center py-5">
+            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+            <h3>Chưa có gợi ý việc làm</h3>
+            <p class="text-muted">Hãy cập nhật thêm kỹ năng để nhận được gợi ý phù hợp hơn</p>
+            <a href="/candidates/updateprofile" class="btn btn-primary">
+                <i class="fas fa-user-edit me-2"></i>Cập nhật hồ sơ
+            </a>
+        </div>
+
+        <div class="row g-4" th:if="${not #lists.isEmpty(recommendations)}">
+            <div class="col-md-6" th:each="recommendation : ${recommendations}">
+                <div class="job-card p-4 h-100">
+                    <div class="d-flex">
+                        <img th:src="${recommendation.job.company.logoUrl}" 
+                             class="company-logo me-3"
+                             th:alt="${recommendation.job.company.name}">
+                        
+                        <div class="flex-grow-1">
+                            <h5 class="job-title" th:text="${recommendation.job.name}">Tên công việc</h5>
+                            <p class="company-name mb-2" th:text="${recommendation.job.company.name}">Tên công ty</p>
+                            
+                            <div class="job-meta mb-3">
+                                <div class="mb-1">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span th:text="${recommendation.job.company.address.city}">Địa điểm</span>
+                                </div>
+                                <div class="mb-1">
+                                    <i class="fas fa-briefcase"></i>
+                                    <span th:text="${recommendation.job.type}">Loại công việc</span>
+                                </div>
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="match-score">
+                                    <i class="fas fa-star me-1"></i>
+                                    Phù hợp <span th:text="${recommendation.score + '%'}">95%</span>
+                                </span>
+                                <span class="deadline-tag">
+                                    Hết hạn: <span th:text="${#temporals.format(recommendation.job.deadline, 'dd/MM/yyyy')}">
+                                        Deadline
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="ms-3 d-flex align-items-center">
+                            <a th:href="@{'/jobs/' + ${recommendation.job.id}}" 
+                               class="btn btn-outline-primary">
+                                Xem chi tiết
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
 
-<div th:replace="fragments/footer :: footer"></div>
-
-
-<!-- Bootstrap JS và các plugin liên quan -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <div th:replace="fragments/footer :: footer"></div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

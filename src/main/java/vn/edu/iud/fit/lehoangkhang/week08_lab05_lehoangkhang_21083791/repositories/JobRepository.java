@@ -3,6 +3,7 @@ package vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.repositor
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.CandidateApplyJob;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.Job;
+import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.enums.JobType;
 
 @Repository
 public interface JobRepository extends JpaRepository<Job, Long> {
@@ -41,4 +43,39 @@ long countExpiringJobs(@Param("companyId") Long companyId,
            "WHERE caj.job.id = :jobId " +
            "ORDER BY caj.applyDate DESC")
     List<CandidateApplyJob> findCandidateApplyJobsByJobId(Long jobId);
+    @Query("SELECT COUNT(caj) FROM CandidateApplyJob caj " +
+           "WHERE caj.job.company.id = :companyId AND caj.candidateViewed = true")
+    long countTotalViewsByCompany(Long companyId);
+    @Query("SELECT DISTINCT j.company.address.city FROM Job j WHERE j.active = true ORDER BY j.company.address.city")
+    List<String> findDistinctCities();
+    @Query(value = "SELECT j.* FROM jobs j " +
+           "LEFT JOIN company c ON j.company_id = c.id " +
+           "LEFT JOIN addresses a ON c.address_id = a.id " +
+           "WHERE j.active = true " +
+           "AND (:keyword IS NULL OR MATCH(j.name, j.description) AGAINST(:keyword IN BOOLEAN MODE)) " +
+           "AND (:city IS NULL OR a.city = :city) " +
+           "AND (:jobType IS NULL OR j.type = :jobType) " +
+           "AND (:minSalary IS NULL OR j.salary_from >= :minSalary) " +
+           "AND (:maxSalary IS NULL OR j.salary_to <= :maxSalary) " +
+           "AND (:negotiable IS NULL OR j.negotiable = :negotiable)",
+           countQuery = "SELECT COUNT(*) FROM jobs j " +
+           "LEFT JOIN company c ON j.company_id = c.id " +
+           "LEFT JOIN addresses a ON c.address_id = a.id " +
+           "WHERE j.active = true " +
+           "AND (:keyword IS NULL OR MATCH(j.name, j.description) AGAINST(:keyword IN BOOLEAN MODE)) " +
+           "AND (:city IS NULL OR a.city = :city) " +
+           "AND (:jobType IS NULL OR j.type = :jobType) " +
+           "AND (:minSalary IS NULL OR j.salary_from >= :minSalary) " +
+           "AND (:maxSalary IS NULL OR j.salary_to <= :maxSalary) " +
+           "AND (:negotiable IS NULL OR j.negotiable = :negotiable)",
+           nativeQuery = true)
+    Page<Job> searchJobs(
+        @Param("keyword") String keyword,
+        @Param("city") String city,
+        @Param("jobType") String jobType,
+        @Param("minSalary") Double minSalary,
+        @Param("maxSalary") Double maxSalary,
+        @Param("negotiable") Boolean negotiable,
+        Pageable pageable
+    );
 }

@@ -19,8 +19,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.enums.JobType;
+import jakarta.persistence.Table;
 
 @Entity
+@Table(name = "jobs")
 @Getter
 @Setter
 @NoArgsConstructor

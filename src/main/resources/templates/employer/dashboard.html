@@ -97,22 +97,39 @@
                             <th>Ứng viên</th>
                             <th>Vị trí</th>
                             <th>Ngày ứng tuyển</th>
-                            <th>Trạng thái</th>
                             <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="application : ${recentApplications}">
-                            <td th:text="${application.candidate.fullName}">Nguyễn Văn A</td>
-                            <td th:text="${application.job.title}">Developer</td>
-                            <td th:text="${#temporals.format(application.applyDate, 'dd/MM/yyyy')}">01/01/2024</td>
-                            <td>
-                                <span class="badge bg-warning" th:text="${application.status}">Đang xử lý</span>
+                        <tr th:each="jobApplication : ${recentApplications}">
+                            <td class="align-middle">
+                                <div class="d-flex align-items-center">
+                                    <img th:if="${jobApplication.candidate.avatarUrl}" 
+                                         th:src="${jobApplication.candidate.avatarUrl}"
+                                         class="rounded-circle me-2"
+                                         style="width: 32px; height: 32px; object-fit: cover;">
+                                    <div>
+                                        <div th:text="${jobApplication.candidate.fullName}">Tên ứng viên</div>
+                                        <small class="text-muted" th:text="${jobApplication.candidate.email}">Email</small>
+                                    </div>
+                                    <span th:if="${!jobApplication.companyViewed}" 
+                                          class="badge bg-danger ms-2">Mới</span>
+                                </div>
                             </td>
-                            <td>
-                                <a th:href="@{'/employer/applications/' + ${application.id}}" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-eye"></i>
+                            <td class="align-middle" th:text="${jobApplication.job.name}">Tên công việc</td>
+                            <td class="align-middle" th:text="${#temporals.format(jobApplication.applyDate, 'dd/MM/yyyy')}">
+                                Ngày ứng tuyển
+                            </td>
+                            <td class="align-middle">
+                                <a th:href="@{'/employer/candidates/' + ${jobApplication.candidate.id} + '/jobs/' + ${jobApplication.job.id}}" 
+                                   class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye me-1"></i>Xem chi tiết
                                 </a>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(recentApplications)}">
+                            <td colspan="4" class="text-center py-4 text-muted">
+                                Chưa có ứng viên nào ứng tuyển
                             </td>
                         </tr>
                     </tbody>

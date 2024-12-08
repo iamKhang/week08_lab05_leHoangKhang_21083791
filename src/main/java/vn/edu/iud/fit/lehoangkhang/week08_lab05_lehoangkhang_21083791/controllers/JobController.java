@@ -2,6 +2,7 @@ package vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.controlle
 
 import java.security.Principal;
 import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -50,11 +51,27 @@ public class JobController {
     private SkillService skillService;
 
     @GetMapping("")
-    public String showJobList(@RequestParam(value = "page", defaultValue = "0") int page,
-                               @RequestParam(value = "size", defaultValue = "10") int size,
-                               Model model) {
-        Page<Job> jobPage = jobService.getJobs(page, size);
+    public String showJobList(
+        @RequestParam(required = false) String keyword,
+        @RequestParam(required = false) String city,
+        @RequestParam(required = false) String jobType,
+        @RequestParam(required = false) String salaryRange,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        Model model) {
+        
+        Page<Job> jobPage = jobService.searchJobs(keyword, city, jobType, salaryRange, page, size);
+        List<String> cities = jobService.getAllCities();
+        
         model.addAttribute("jobPage", jobPage);
+        model.addAttribute("cities", cities);
+        
+        // Thêm các tham số tìm kiếm vào model để giữ lại khi phân trang
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("selectedCity", city);
+        model.addAttribute("selectedJobType", jobType);
+        model.addAttribute("selectedSalaryRange", salaryRange);
+        
         return "jobs/job-list";
     }
 

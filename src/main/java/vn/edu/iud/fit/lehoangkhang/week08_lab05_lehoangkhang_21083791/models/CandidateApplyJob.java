@@ -26,4 +26,8 @@ public class CandidateApplyJob {
     private Job job;
     @Column(name = "apply_date")
     private LocalDate applyDate;
+    @Column(name="candidate_viewed")
+    private boolean candidateViewed;
+    @Column(name="company_viewed")
+    private boolean companyViewed;
 }

@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.Candidate;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.repositories.CandidateRepository;
 
+import java.util.Optional;
+
 @Service
 public class CandidateService {
 
@@ -29,5 +31,9 @@ public class CandidateService {
 
     public Candidate findByEmail(String email) {
         return candidateRepository.findByEmail(email);
+    }
+
+    public Optional<Candidate> findById(Long id) {
+        return candidateRepository.findById(id);
     }
 }

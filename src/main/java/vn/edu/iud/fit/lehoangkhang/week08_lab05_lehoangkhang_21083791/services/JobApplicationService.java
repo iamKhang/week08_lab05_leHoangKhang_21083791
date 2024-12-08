@@ -67,4 +67,20 @@ public class JobApplicationService {
         }
         return applyJobRepository.existsByCandidateAndJob(candidate, job);
     }
+
+    @Transactional
+    public void markAsViewedByCompany(Long candidateId, Long jobId) {
+        CandidateApplyJob application = applyJobRepository.findByCandidateIdAndJobId(candidateId, jobId)
+            .orElseThrow(() -> new RuntimeException("Application not found"));
+        application.setCompanyViewed(true);
+        applyJobRepository.save(application);
+    }
+
+    @Transactional
+    public void markAsViewedByCandidate(Long candidateId, Long jobId) {
+        CandidateApplyJob application = applyJobRepository.findByCandidateIdAndJobId(candidateId, jobId)
+            .orElseThrow(() -> new RuntimeException("Application not found"));
+        application.setCandidateViewed(true);
+        applyJobRepository.save(application);
+    }
 } 

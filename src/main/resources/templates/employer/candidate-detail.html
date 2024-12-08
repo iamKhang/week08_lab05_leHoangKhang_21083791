@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Chi tiết ứng viên</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .profile-header {
+            background: linear-gradient(135deg, #1a237e, #0d47a1);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .profile-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid rgba(255,255,255,0.2);
+        }
+        
+        .info-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+        }
+        
+        .skill-badge {
+            background: #e3f2fd;
+            color: #1565c0;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            margin: 0.25rem;
+            display: inline-block;
+        }
+        
+        .experience-item {
+            border-left: 2px solid #1565c0;
+            padding-left: 1.5rem;
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        
+        .experience-item::before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background: #1565c0;
+            border-radius: 50%;
+            position: absolute;
+            left: -7px;
+            top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <div class="profile-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-3 text-center">
+                    <img th:if="${candidate.avatarUrl}" 
+                         th:src="${candidate.avatarUrl}"
+                         class="profile-avatar"
+                         th:alt="${candidate.fullName}">
+                    <div th:unless="${candidate.avatarUrl}" 
+                         class="profile-avatar d-flex align-items-center justify-content-center bg-light">
+                        <i class="fas fa-user fa-3x text-muted"></i>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <h1 th:text="${candidate.fullName}">Họ tên ứng viên</h1>
+                    <p class="mb-2">
+                        <i class="fas fa-envelope me-2"></i>
+                        <span th:text="${candidate.email}">Email</span>
+                    </p>
+                    <p class="mb-2">
+                        <i class="fas fa-phone me-2"></i>
+                        <span th:text="${candidate.phone}">Số điện thoại</span>
+                    </p>
+                    <p class="mb-0">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        <span th:text="${candidate.address != null ? 
+                            candidate.address.number + ' ' + 
+                            candidate.address.street + ', ' + 
+                            candidate.address.city + ', ' + 
+                            candidate.address.country : 'Chưa cập nhật'}">
+                            Địa chỉ
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <!-- Kỹ năng -->
+            <div class="col-md-6">
+                <div class="info-card card">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">
+                            <i class="fas fa-code me-2"></i>Kỹ năng
+                        </h4>
+                        <div th:if="${not #lists.isEmpty(candidate.candidateSkills)}">
+                            <div th:each="skill : ${candidate.candidateSkills}" 
+                                 class="skill-badge">
+                                <span th:text="${skill.skill.skillName}">Skill name</span>
+                                <span class="ms-1 text-muted" 
+                                      th:text="'(' + ${skill.skillLevel} + ')'">Level</span>
+                            </div>
+                        </div>
+                        <p th:if="${#lists.isEmpty(candidate.candidateSkills)}" 
+                           class="text-muted">Chưa cập nhật kỹ năng</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kinh nghiệm -->
+            <div class="col-md-6">
+                <div class="info-card card">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">
+                            <i class="fas fa-briefcase me-2"></i>Kinh nghiệm làm việc
+                        </h4>
+                        <div th:if="${not #lists.isEmpty(candidate.experiences)}">
+                            <div th:each="exp : ${candidate.experiences}" 
+                                 class="experience-item">
+                                <h5 th:text="${exp.role}">Vị trí</h5>
+                                <p class="text-muted mb-2">
+                                    <span th:text="${exp.companyName}">Công ty</span> •
+                                    <span th:text="${#temporals.format(exp.fromDate, 'MM/yyyy')} + ' - ' + 
+                                                  ${#temporals.format(exp.toDate, 'MM/yyyy')}">
+                                        Thời gian
+                                    </span>
+                                </p>
+                                <p th:text="${exp.workDescription}" class="mb-0">Mô tả công việc</p>
+                            </div>
+                        </div>
+                        <p th:if="${#lists.isEmpty(candidate.experiences)}" 
+                           class="text-muted">Chưa cập nhật kinh nghiệm</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

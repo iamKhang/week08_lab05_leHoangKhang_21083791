@@ -121,32 +121,64 @@
 <div th:replace="fragments/header :: header"></div>
 
 <div class="container mt-5">
-    <!-- Phần tìm kiếm và lọc -->
+    <!-- Thêm form tìm kiếm và lọc -->
     <div class="filter-section mb-4">
-        <div class="row g-3">
-            <div class="col-md-4">
-                <input type="text" class="form-control" placeholder="Tìm kiếm công việc...">
-            </div>
+        <form th:action="@{/jobs}" method="get" class="row g-3">
             <div class="col-md-3">
-                <select class="form-select">
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" 
+                           class="form-control" 
+                           name="keyword" 
+                           th:value="${param.keyword}"
+                           placeholder="Tên công việc...">
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <select class="form-select" name="city">
                     <option value="">Tất cả địa điểm</option>
-                    <option>Hà Nội</option>
-                    <option>TP.HCM</option>
-                    <option>Đà Nẵng</option>
+                    <option th:each="city : ${cities}"
+                            th:value="${city}"
+                            th:text="${city}"
+                            th:selected="${param.city == city}">
+                        Thành phố
+                    </option>
                 </select>
             </div>
-            <div class="col-md-3">
-                <select class="form-select">
-                    <option value="">Tất cả ngành nghề</option>
-                    <option>IT - Phần mềm</option>
-                    <option>Marketing</option>
-                    <option>Kế toán</option>
-                </select>
-            </div>
+
             <div class="col-md-2">
-                <button class="btn btn-primary w-100">Tìm kiếm</button>
+                <select class="form-select" name="jobType">
+                    <option value="">Tất cả loại việc</option>
+                    <option th:each="type : ${T(vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.enums.JobType).values()}"
+                            th:value="${type}"
+                            th:text="${type}"
+                            th:selected="${param.jobType == type}">
+                        Loại công việc
+                    </option>
+                </select>
             </div>
-        </div>
+
+            <div class="col-md-2">
+                <select class="form-select" name="salaryRange">
+                    <option value="">Mức lương</option>
+                    <option value="0-5" th:selected="${param.salaryRange == '0-5'}">Dưới 5 triệu</option>
+                    <option value="5-10" th:selected="${param.salaryRange == '5-10'}">5 - 10 triệu</option>
+                    <option value="10-15" th:selected="${param.salaryRange == '10-15'}">10 - 15 triệu</option>
+                    <option value="15-20" th:selected="${param.salaryRange == '15-20'}">15 - 20 triệu</option>
+                    <option value="20+" th:selected="${param.salaryRange == '20+'}">Trên 20 triệu</option>
+                    <option value="negotiable" th:selected="${param.salaryRange == 'negotiable'}">Thỏa thuận</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-filter me-2"></i>Lọc
+                </button>
+            </div>
+        </form>
     </div>
 
     <!-- Danh sách công việc -->
@@ -209,17 +241,45 @@
     <nav aria-label="Page navigation" class="mt-4">
         <ul class="pagination justify-content-center">
             <li class="page-item" th:classappend="${jobPage.hasPrevious()} ? '' : 'disabled'">
-                <a class="page-link" th:href="@{/jobs(page=${jobPage.number - 1}, size=${jobPage.size})}" aria-label="Previous">
+                <a class="page-link" 
+                   th:href="@{/jobs(
+                       page=${jobPage.number},
+                       size=${jobPage.size},
+                       keyword=${param.keyword},
+                       city=${param.city},
+                       jobType=${param.jobType},
+                       salaryRange=${param.salaryRange}
+                   )}" 
+                   aria-label="Previous">
                     <span aria-hidden="true">&laquo; Previous</span>
                 </a>
             </li>
-            <li class="page-item" th:each="pageNum : ${#numbers.sequence(0, jobPage.totalPages - 1)}" 
+            
+            <li class="page-item" 
+                th:each="pageNum : ${#numbers.sequence(0, jobPage.totalPages - 1)}"
                 th:classappend="${pageNum == jobPage.number} ? 'active'">
-                <a class="page-link" th:href="@{/jobs(page=${pageNum}, size=${jobPage.size})}" 
-                   th:text="${pageNum + 1}"></a>
+                <a class="page-link" 
+                   th:href="@{/jobs(
+                       page=${pageNum},
+                       size=${jobPage.size},
+                       keyword=${param.keyword},
+                       city=${param.city},
+                       jobType=${param.jobType},
+                       salaryRange=${param.salaryRange}
+                   )}"
+                   th:text="${pageNum + 1}">1</a>
             </li>
+            
             <li class="page-item" th:classappend="${jobPage.hasNext()} ? '' : 'disabled'">
-                <a class="page-link" th:href="@{/jobs(page=${jobPage.number + 1}, size=${jobPage.size})}" 
+                <a class="page-link"
+                   th:href="@{/jobs(
+                       page=${jobPage.number + 2},
+                       size=${jobPage.size},
+                       keyword=${param.keyword},
+                       city=${param.city},
+                       jobType=${param.jobType},
+                       salaryRange=${param.salaryRange}
+                   )}"
                    aria-label="Next">
                     <span aria-hidden="true">Next &raquo;</span>
                 </a>

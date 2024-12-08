@@ -1,0 +1,1 @@
+ALTER TABLE jobs ADD FULLTEXT INDEX ft_job_search (name, description); 
