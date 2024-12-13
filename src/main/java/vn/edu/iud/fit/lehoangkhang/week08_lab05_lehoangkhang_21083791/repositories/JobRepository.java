@@ -80,4 +80,6 @@ long countExpiringJobs(@Param("companyId") Long companyId,
         @Param("negotiable") Boolean negotiable,
         Pageable pageable
     );
+    List<Job> findByCompanyIdAndActiveTrue(Long companyId);
+    List<Job> findTop10ByCompanyIdAndActiveTrueOrderByStartDateDesc(Long companyId);
 }

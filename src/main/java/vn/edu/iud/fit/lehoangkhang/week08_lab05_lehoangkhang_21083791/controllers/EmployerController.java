@@ -39,12 +39,29 @@ public class EmployerController {
 
     @GetMapping("/dashboard")
     public String showDashboard(Model model, Principal principal) {
-        // Lấy thông tin account từ email đăng nhập
         Account account = accountService.findByEmail(principal.getName())
-            .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản"));
+                .orElseThrow(() -> new RuntimeException("Account not found"));
         
-        Company company = account.getCompany();
+        Long companyId = account.getCompany().getId();
+
+        // Thống kê tổng quan
+        long activeJobs = jobService.countActiveJobsByCompany(companyId);
+        long totalApplications = jobService.countTotalApplicationsByCompany(companyId);
+        long expiringJobs = jobService.countExpiringJobsByCompany(companyId);
         
+        // Lấy 5 ứng viên mới nhất
+        List<CandidateApplyJob> recentApplications = jobService.getRecentApplicationsByCompany(companyId);
+        
+        // Danh sách việc làm đang tuyển
+        List<Job> activeJobsList = jobService.getActiveJobsByCompany(companyId);
+
+        model.addAttribute("activeJobs", activeJobs);
+        model.addAttribute("totalApplications", totalApplications);
+        model.addAttribute("expiringJobs", expiringJobs);
+        model.addAttribute("recentApplications", recentApplications);
+        model.addAttribute("activeJobsList", activeJobsList);
+        model.addAttribute("company", account.getCompany());
+
         return "employer/dashboard";
     }
 

@@ -116,4 +116,8 @@ public class JobService {
             PageRequest.of(page, size)
         );
     }
+
+    public List<Job> getActiveJobsByCompany(Long companyId) {
+        return jobRepository.findTop10ByCompanyIdAndActiveTrueOrderByStartDateDesc(companyId);
+    }
 }
