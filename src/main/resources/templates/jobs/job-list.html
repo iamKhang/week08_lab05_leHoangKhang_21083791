@@ -8,14 +8,94 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
     <style>
         .job-card {
-            transition: transform 0.2s;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
         
         .job-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .job-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .job-header {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .job-info {
+            flex: 1;
+            min-width: 0; /* Để text-overflow hoạt động */
+        }
+
+        .job-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.3;
+        }
+
+        .company-name {
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .job-meta {
+            margin-bottom: 1rem;
+        }
+
+        .job-meta-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .job-meta i {
+            width: 20px;
+            color: #888;
+            margin-right: 0.5rem;
+        }
+
+        .job-meta-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .action-container {
+            margin-top: auto;
+            display: flex;
+            justify-content: flex-end;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .btn-view-detail {
+            min-width: 120px; /* Đặt chiều rộng cố định cho nút */
+            text-align: center;
         }
 
         .company-logo {
@@ -23,28 +103,6 @@
             height: 80px;
             object-fit: cover;
             border-radius: 8px;
-        }
-
-        .job-title {
-            color: #2d2d2d;
-            font-weight: 600;
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .company-name {
-            color: #666;
-            font-size: 0.95rem;
-        }
-
-        .job-meta {
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .job-meta i {
-            width: 20px;
-            color: #888;
         }
 
         .salary-tag {
@@ -152,53 +210,54 @@
     <!-- Danh sách công việc -->
     <div class="row g-4">
         <div class="col-md-6" th:each="job : ${jobPage.content}">
-            <div class="job-card p-4 h-100">
-                <div class="d-flex">
-                    <!-- Logo công ty -->
-                    <img th:src="${job.company.logoUrl}" 
-                         th:onerror="this.src='https://placehold.co/80x80/e0e0e0/666666?text=' + ${#strings.substring(job.company.name,0,2)}"
-                         class="company-logo me-3" 
-                         th:alt="${job.company.name + ' logo'}"/>
-                    
-                    <!-- Thông tin công việc -->
-                    <div class="flex-grow-1">
-                        <h5 class="job-title" th:text="${job.name}">Job Title</h5>
-                        <p class="company-name mb-2" th:text="${job.company.name}">Company Name</p>
-                        
-                        <!-- Meta info -->
-                        <div class="job-meta mb-3">
-                            <div class="mb-1">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span th:text="${job.company.address.city}">Location</span>
-                            </div>
-                            <div class="mb-1">
-                                <i class="fas fa-briefcase"></i>
-                                <span th:text="${job.type}">Job Type</span>
-                            </div>
-                            <div>
-                                <i class="fas fa-user-graduate"></i>
-                                <span th:text="${job.requiredExperienceYears + ' năm kinh nghiệm'}">Experience</span>
+            <div class="card job-card">
+                <div class="card-body">
+                    <div class="job-content">
+                        <div class="job-header">
+                            <img th:src="${job.company.logoUrl}" 
+                                 class="company-logo" 
+                                 th:onerror="this.src='https://placehold.co/80x80/e0e0e0/666666?text=' + ${#strings.substring(job.company.name,0,2)}"
+                                 th:alt="${job.company.name + ' logo'}"/>
+                            <div class="job-info">
+                                <h5 class="job-title" th:text="${job.name}">Job Title</h5>
+                                <p class="company-name mb-0" th:text="${job.company.name}">Company Name</p>
                             </div>
                         </div>
 
-                        <!-- Tags -->
-                        <div class="d-flex flex-wrap gap-2">
+                        <div class="job-meta">
+                            <div class="job-meta-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span class="job-meta-text" th:text="${job.company.address.city}">Location</span>
+                            </div>
+                            <div class="job-meta-item">
+                                <i class="fas fa-briefcase"></i>
+                                <span class="job-meta-text" th:text="${job.type}">Job Type</span>
+                            </div>
+                            <div class="job-meta-item">
+                                <i class="fas fa-user-graduate"></i>
+                                <span class="job-meta-text" th:text="${job.requiredExperienceYears + ' năm kinh nghiệm'}">Experience</span>
+                            </div>
+                        </div>
+
+                        <div class="tags-container">
                             <span class="salary-tag" th:if="${!job.negotiable}" 
                                   th:text="${#numbers.formatDecimal(job.salaryFrom/1000000, 0, 'COMMA', 0, 'POINT')} + 'M - ' + 
                                           ${#numbers.formatDecimal(job.salaryTo/1000000, 0, 'COMMA', 0, 'POINT')} + 'M'">
                                 Salary
                             </span>
                             <span class="salary-tag" th:if="${job.negotiable}">Thương lượng</span>
-                            <span class="deadline-tag" 
-                                  th:text="'Hết hạn: ' + ${#temporals.format(job.deadline, 'dd/MM/yyyy')}">
-                                Deadline
+                            <span class="deadline-tag">
+                                <i class="fas fa-clock me-1"></i>
+                                <span th:text="${#temporals.format(job.deadline, 'dd/MM/yyyy')}">Deadline</span>
                             </span>
                         </div>
                     </div>
 
-                    <!-- Nút xem chi tiết -->
-                    <div class="ms-3 d-flex align-items-center">
-                        <a th:href="@{/jobs/{id}(id=${job.id})}" class="btn btn-outline-primary">Xem chi tiết</a>
+                    <div class="action-container">
+                        <a th:href="@{/jobs/{id}(id=${job.id})}" 
+                           class="btn btn-outline-primary btn-view-detail">
+                            <i class="fas fa-eye me-2"></i>Xem chi tiết
+                        </a>
                     </div>
                 </div>
             </div>

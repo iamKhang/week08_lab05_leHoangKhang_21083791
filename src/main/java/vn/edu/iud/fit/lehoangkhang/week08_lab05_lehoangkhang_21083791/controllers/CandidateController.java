@@ -140,103 +140,53 @@ public class CandidateController {
         }
     }
 
+    @GetMapping("/updateprofile")
     @PreAuthorize("hasRole('CANDIDATE')")
-@GetMapping("/updateprofile")
-public String showUpdateProfileForm(Model model, Principal principal) {
-    // Lấy thông tin candidate từ email đăng nhập
-    Candidate candidate = candidateService.findByEmail(principal.getName());
-    if (candidate == null) {
-        return "redirect:/candidates";
-    }
-
-    // Thêm dữ liệu vào model
-    model.addAttribute("candidate", candidate);
-    model.addAttribute("skills", skillService.getAllSkills());
-    model.addAttribute("skillLevels", SkillLevel.values());
-    
-    return "candidates/update-profile";
-}
-
-    // @PreAuthorize("hasRole('CANDIDATE')")
-    // @PostMapping("/updateprofile")
-    // public String updateProfile(@Valid @ModelAttribute("candidate") Candidate candidate,
-    //         @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile,
-    //         BindingResult result, Model model, Principal principal) {
-    //     if (result.hasErrors()) {
-    //         model.addAttribute("skills", skillService.getAllSkills());
-    //         model.addAttribute("skillLevels", SkillLevel.values());
-    //         return "candidates/update-profile";
-    //     }
-
-    //     String email = principal.getName();
-    //     Account existingAccount = accountService.findByEmail(email)
-    //             .orElseThrow(() -> new RuntimeException("Account not found"));
-
-    //     Candidate existingCandidate = existingAccount.getCandidate();
-    //     if (existingCandidate == null) {
-    //         return "redirect:/candidates";
-    //     }
-
-    //     try {
-    //         // Xử lý upload avatar nếu có
-    //         if (avatarFile != null && !avatarFile.isEmpty()) {
-    //             String fileName = fileStorageService.saveAvatarFile(avatarFile);
-    //             existingCandidate.setAvatarUrl("/uploads/avatars/" + fileName);
-    //         } else {
-    //             // Giữ lại avatar URL cũ
-    //             existingCandidate.setAvatarUrl(candidate.getAvatarUrl());
-    //         }
-
-    //         // Cập nhật các thông tin khác
-    //         existingCandidate.setFullName(candidate.getFullName());
-    //         existingCandidate.setPhone(candidate.getPhone());
-    //         existingCandidate.setEmail(candidate.getEmail());
-    //         existingCandidate.setDob(candidate.getDob());
-    //         if (existingCandidate.getAddress() != null) {
-    //             existingCandidate.getAddress().setCountry(candidate.getAddress().getCountry());
-    //             existingCandidate.getAddress().setCity(candidate.getAddress().getCity());
-    //             existingCandidate.getAddress().setStreet(candidate.getAddress().getStreet());
-    //             existingCandidate.getAddress().setNumber(candidate.getAddress().getNumber());
-    //             existingCandidate.getAddress().setZipcode(candidate.getAddress().getZipcode());
-    //         } else {
-    //             existingCandidate.setAddress(candidate.getAddress());
-    //         }
-
-    //         existingCandidate.getCandidateSkills().clear();
-    //         if (candidate.getCandidateSkills() != null) {
-    //             for (CandidateSkill skill : candidate.getCandidateSkills()) {
-    //                 skill.setCandidate(existingCandidate);
-    //                 existingCandidate.getCandidateSkills().add(skill);
-    //             }
-    //         }
-    //         existingCandidate.getExperiences().clear();
-    //         if (candidate.getExperiences() != null) {
-    //             for (Experience exp : candidate.getExperiences()) {
-    //                 exp.setCandidate(existingCandidate);
-    //                 existingCandidate.getExperiences().add(exp);
-    //             }
-    //         }
-    //         candidateService.saveCandidate(existingCandidate);
-    //         return "redirect:/candidates";
-    //     } catch (Exception e) {
-    //         model.addAttribute("error", "Có lỗi xảy ra khi cập nhật thông tin.");
-    //         return "candidates/update-profile";
-    //     }
-    // }
-
-    @GetMapping("/recommendations")
-    public String showJobRecommendations(Model model, Principal principal) {
-        // Lấy candidate từ email đăng nhập
+    public String showUpdateProfileForm(Model model, Principal principal) {
+        if (principal == null) {
+            return "redirect:/login";
+        }
+        
         Candidate candidate = candidateService.findByEmail(principal.getName());
         if (candidate == null) {
             return "redirect:/candidates";
         }
 
-        // Match các công việc phù hợp với ứng viên
-        List<JobMatchingService.JobRecommendation> recommendations = jobMatchingService
-                .matchCandidateWithJobs(candidate);
+        model.addAttribute("candidate", candidate);
+        model.addAttribute("skills", skillService.getAllSkills());
+        model.addAttribute("skillLevels", SkillLevel.values());
+        
+        return "candidates/update-profile";
+    }
 
-        model.addAttribute("recommendations", recommendations);
+    @GetMapping("/recommendations")
+    @PreAuthorize("hasRole('CANDIDATE')")
+    public String showJobRecommendations(Model model, Principal principal,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        
+        if (principal == null) {
+            return "redirect:/login";
+        }
+
+        Candidate candidate = candidateService.findByEmail(principal.getName());
+        if (candidate == null) {
+            return "redirect:/candidates";
+        }
+
+        List<JobMatchingService.JobRecommendation> allRecommendations = 
+            jobMatchingService.matchCandidateWithJobs(candidate);
+
+        // Phân trang
+        int start = page * size;
+        int end = Math.min(start + size, allRecommendations.size());
+        List<JobMatchingService.JobRecommendation> pageRecommendations = 
+            allRecommendations.subList(start, end);
+
+        model.addAttribute("recommendations", pageRecommendations);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", (int) Math.ceil(allRecommendations.size() / (double) size));
+
         return "candidates/job-recommentdations";
     }
 }

@@ -39,23 +39,26 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers("/register/**", "/login", "/css/**", "/js/**", "/", "/jobs", "/jobs/*").permitAll()
-                        .requestMatchers("/candidates/updateprofile").hasRole("CANDIDATE")
-                        .anyRequest().permitAll()
-                )
-                .formLogin((form) -> form
-                        .loginPage("/login")
-                        .usernameParameter("username")
-                        .passwordParameter("password")
-                        .defaultSuccessUrl("/")
-                        .permitAll()
-                )
-                .logout((logout) -> logout
-                        .permitAll()
-                )
-                .authenticationProvider(authenticationProvider());
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests((authorize) -> authorize
+                .requestMatchers("/register/**", "/login", "/css/**", "/js/**", "/", "/jobs", "/jobs/*", 
+                               "/uploads/**", "/images/**", "/error").permitAll()
+                .requestMatchers("/candidates/**").hasRole("CANDIDATE")
+                .requestMatchers("/employer/**").hasRole("EMPLOYER")
+                .anyRequest().authenticated()
+            )
+            .formLogin((form) -> form
+                .loginPage("/login")
+                .usernameParameter("username")
+                .passwordParameter("password")
+                .defaultSuccessUrl("/")
+                .permitAll()
+            )
+            .logout((logout) -> logout
+                .logoutSuccessUrl("/")
+                .permitAll()
+            )
+            .authenticationProvider(authenticationProvider());
 
         return http.build();
     }

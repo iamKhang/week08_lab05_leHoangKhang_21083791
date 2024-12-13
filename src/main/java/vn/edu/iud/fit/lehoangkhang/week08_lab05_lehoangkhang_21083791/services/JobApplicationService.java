@@ -56,15 +56,15 @@ public class JobApplicationService {
     public boolean hasApplied(Candidate candidate, Long jobId) {
         Job job = jobRepository.findById(jobId)
             .orElseThrow(() -> new RuntimeException("Job not found"));
-        if (applyJobRepository.existsByCandidateAndJob(candidate, job)) {
-            System.out.println("Candidate: " + candidate.getId());
-            System.out.println("Job: " + job.getId());
-            System.out.println("Has applied");
-        }else {
-            System.out.println("Candidate: " + candidate.getId());
-            System.out.println("Job: " + job.getId());
-            System.out.println("Has not applied");
-        }
+//        if (applyJobRepository.existsByCandidateAndJob(candidate, job)) {
+//            System.out.println("Candidate: " + candidate.getId());
+//            System.out.println("Job: " + job.getId());
+//            System.out.println("Has applied");
+//        }else {
+//            System.out.println("Candidate: " + candidate.getId());
+//            System.out.println("Job: " + job.getId());
+//            System.out.println("Has not applied");
+//        }
         return applyJobRepository.existsByCandidateAndJob(candidate, job);
     }
 } 

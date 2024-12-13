@@ -41,4 +41,5 @@ long countExpiringJobs(@Param("companyId") Long companyId,
            "WHERE caj.job.id = :jobId " +
            "ORDER BY caj.applyDate DESC")
     List<CandidateApplyJob> findCandidateApplyJobsByJobId(Long jobId);
+    List<Job> findTop6ByActiveOrderByStartDateDesc(boolean active);
 }

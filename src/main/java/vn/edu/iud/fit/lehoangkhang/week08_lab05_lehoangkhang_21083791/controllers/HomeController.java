@@ -35,20 +35,21 @@ public class HomeController {
     public String home(Model model, Principal principal) {
         // Kiểm tra nếu user đã đăng nhập
         if (principal != null) {
-            // Lấy thông tin authentication
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            
-            // Kiểm tra role
             if (auth.getAuthorities().stream()
                     .anyMatch(a -> a.getAuthority().equals("ROLE_EMPLOYER"))) {
-                // Nếu là nhà tuyển dụng, chuyển đến dashboard
                 return "redirect:/employer/dashboard";
             }
         }
 
-        // Nếu không phải nhà tuyển dụng hoặc chưa đăng nhập, hiển thị trang chủ bình thường
-        model.addAttribute("topJobs", jobRepository.findTop4ByActiveOrderByStartDateDesc(true));
-        model.addAttribute("jobTypes", jobRepository.countTopJobTypes());
+        // Lấy 6 việc làm mới nhất
+        List<Job> recentJobs = jobRepository.findTop6ByActiveOrderByStartDateDesc(true);
+        model.addAttribute("recentJobs", recentJobs);
+
+        // Lấy thống kê theo loại công việc
+        List<Object[]> jobTypeStats = jobRepository.countTopJobTypes();
+        model.addAttribute("jobTypeStats", jobTypeStats);
+
         return "index";
     }
 } 

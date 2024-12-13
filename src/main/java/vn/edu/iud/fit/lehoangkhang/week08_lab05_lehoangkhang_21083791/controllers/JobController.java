@@ -2,6 +2,7 @@ package vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.controlle
 
 import java.security.Principal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -112,28 +113,33 @@ public class JobController {
 //    }
 @PreAuthorize("hasRole('EMPLOYER')")
 @PostMapping("/post")
-public String postJob(@Valid @ModelAttribute Job job, BindingResult result,
-                      Principal principal, Model model) {
-    // Kiểm tra nếu negotiable = true thì xóa giá trị lương
-    if (job.isNegotiable()) {
-        job.setSalaryFrom(0);
-        job.setSalaryTo(0);
-    } else {
-        // Validate mức lương khi không thỏa thuận
-        if (job.getSalaryFrom() <= 0 || job.getSalaryTo() <= 0 ||
-                job.getSalaryFrom() > job.getSalaryTo()) {
-            result.rejectValue("salaryFrom", "error.salary", "Mức lương không hợp lệ");
-        }
-    }
-
-    if (result.hasErrors()) {
-        model.addAttribute("jobTypes", JobType.values());
-        model.addAttribute("skills", skillService.getAllSkills());
-        model.addAttribute("skillLevels", SkillLevel.values());
-        return "jobs/add-job";
-    }
-
+public String postJob(@Valid @ModelAttribute Job job, 
+                     @RequestParam("deadlineStr") String deadlineStr,
+                     BindingResult result,
+                     Principal principal, 
+                     Model model) {
     try {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate deadline = LocalDate.parse(deadlineStr, formatter);
+        job.setDeadline(deadline);
+
+        if (job.isNegotiable()) {
+            job.setSalaryFrom(0);
+            job.setSalaryTo(0);
+        } else {
+            if (job.getSalaryFrom() <= 0 || job.getSalaryTo() <= 0 ||
+                    job.getSalaryFrom() > job.getSalaryTo()) {
+                result.rejectValue("salaryFrom", "error.salary", "Mức lương không hợp lệ");
+            }
+        }
+
+        if (result.hasErrors()) {
+            model.addAttribute("jobTypes", JobType.values());
+            model.addAttribute("skills", skillService.getAllSkills());
+            model.addAttribute("skillLevels", SkillLevel.values());
+            return "jobs/add-job";
+        }
+
         Account account = accountService.findByEmail(principal.getName())
                 .orElseThrow(() -> new RuntimeException("Account not found"));
 
@@ -152,6 +158,9 @@ public String postJob(@Valid @ModelAttribute Job job, BindingResult result,
         return "redirect:/jobs";
     } catch (Exception e) {
         model.addAttribute("error", "Có lỗi xảy ra khi đăng tin tuyển dụng");
+        model.addAttribute("jobTypes", JobType.values());
+        model.addAttribute("skills", skillService.getAllSkills());
+        model.addAttribute("skillLevels", SkillLevel.values());
         return "jobs/add-job";
     }
 }

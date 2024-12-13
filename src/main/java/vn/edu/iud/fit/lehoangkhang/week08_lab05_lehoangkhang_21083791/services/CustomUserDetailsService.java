@@ -24,34 +24,19 @@ public class CustomUserDetailsService implements UserDetailsService {
         Account account = accountRepository.findByCandidate_EmailOrCompany_Email(username, username)
             .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy tài khoản"));
 
-        String displayName;
-        String email;
-        String avatarUrl = null;
-        String logoUrl = null;
-        
-        if (account.getRole() == AccountRole.CANDIDATE && account.getCandidate() != null) {
-            displayName = account.getCandidate().getFullName();
-            email = account.getCandidate().getEmail();
-            avatarUrl = account.getCandidate().getAvatarUrl();
-        } else if (account.getRole() == AccountRole.EMPLOYER && account.getCompany() != null) {
-            displayName = account.getCompany().getName();
-            email = account.getCompany().getEmail();
-            logoUrl = account.getCompany().getLogoUrl();
-        } else {
-            throw new UsernameNotFoundException("Tài khoản không hợp lệ");
-        }
-
         List<GrantedAuthority> authorities = Collections.singletonList(
             new SimpleGrantedAuthority("ROLE_" + account.getRole().name())
         );
 
+        System.out.println("User role: " + account.getRole().name());
+
         return new CustomUserDetails(
-            email,
+            username,
             account.getPassword(),
             authorities,
-            displayName,
-            avatarUrl,
-            logoUrl
+            account.getDisplayName(),
+            account.getRole() == AccountRole.CANDIDATE ? account.getCandidate().getAvatarUrl() : null,
+            account.getRole() == AccountRole.EMPLOYER ? account.getCompany().getLogoUrl() : null
         );
     }
 }
