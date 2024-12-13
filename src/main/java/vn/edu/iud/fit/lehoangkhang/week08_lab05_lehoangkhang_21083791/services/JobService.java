@@ -3,6 +3,7 @@ package vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.services;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.CandidateApplyJob;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.Job;
+import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.enums.JobType;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.repositories.JobRepository;
 
 @Service
@@ -58,5 +60,60 @@ public class JobService {
 
     public List<CandidateApplyJob> getApplicationsByJob(Long jobId) {
         return jobRepository.findCandidateApplyJobsByJobId(jobId);
+    }
+
+    public List<String> getDistinctCities() {
+        return jobRepository.findDistinctCities();
+    }
+
+    public List<JobType> getDistinctJobTypes() {
+        return Arrays.asList(JobType.values());
+    }
+
+    public Page<Job> searchJobs(String keyword, String city, String jobType, 
+                              String salaryRange, int page, int size) {
+        
+        // Xử lý keyword
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            keyword = keyword.trim();
+        } else {
+            keyword = null;
+        }
+
+        // Xử lý city
+        if (city != null && city.trim().isEmpty()) {
+            city = null;
+        }
+
+        // Xử lý jobType
+        if (jobType != null && jobType.trim().isEmpty()) {
+            jobType = null;
+        }
+
+        Double minSalary = null;
+        Double maxSalary = null;
+        Boolean negotiable = null;
+
+        if (salaryRange != null && !salaryRange.isEmpty()) {
+            if (salaryRange.equals("negotiable")) {
+                negotiable = true;
+            } else if (salaryRange.equals("20+")) {
+                minSalary = 20000000.0;
+            } else {
+                String[] range = salaryRange.split("-");
+                minSalary = Double.parseDouble(range[0]) * 1000000;
+                maxSalary = Double.parseDouble(range[1]) * 1000000;
+            }
+        }
+
+        return jobRepository.searchJobs(
+            keyword,
+            city,
+            jobType,
+            minSalary,
+            maxSalary,
+            negotiable,
+            PageRequest.of(page, size)
+        );
     }
 }

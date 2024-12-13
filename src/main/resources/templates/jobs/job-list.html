@@ -181,30 +181,51 @@
 <div class="container mt-5">
     <!-- Phần tìm kiếm và lọc -->
     <div class="filter-section mb-4">
-        <div class="row g-3">
+        <form method="get" action="/jobs" class="row g-3">
             <div class="col-md-4">
-                <input type="text" class="form-control" placeholder="Tìm kiếm công việc...">
+                <input type="text" name="keyword" class="form-control" 
+                       placeholder="Tìm kiếm công việc..." 
+                       th:value="${keyword}">
             </div>
             <div class="col-md-3">
-                <select class="form-select">
+                <select name="city" class="form-select">
                     <option value="">Tất cả địa điểm</option>
-                    <option>Hà Nội</option>
-                    <option>TP.HCM</option>
-                    <option>Đà Nẵng</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <select class="form-select">
-                    <option value="">Tất cả ngành nghề</option>
-                    <option>IT - Phần mềm</option>
-                    <option>Marketing</option>
-                    <option>Kế toán</option>
+                    <option th:each="city : ${cities}"
+                            th:value="${city}"
+                            th:text="${city}"
+                            th:selected="${city == selectedCity}">
+                        City
+                    </option>
                 </select>
             </div>
             <div class="col-md-2">
-                <button class="btn btn-primary w-100">Tìm kiếm</button>
+                <select name="jobType" class="form-select">
+                    <option value="">Tất cả ngành nghề</option>
+                    <option th:each="type : ${jobTypes}"
+                            th:value="${type}"
+                            th:text="${type}"
+                            th:selected="${type == selectedJobType}">
+                        Job Type
+                    </option>
+                </select>
             </div>
-        </div>
+            <div class="col-md-2">
+                <select name="salaryRange" class="form-select">
+                    <option value="">Mức lương</option>
+                    <option value="0-10" th:selected="${selectedSalaryRange == '0-10'}">0-10 triệu</option>
+                    <option value="10-20" th:selected="${selectedSalaryRange == '10-20'}">10-20 triệu</option>
+                    <option value="20-30" th:selected="${selectedSalaryRange == '20-30'}">20-30 triệu</option>
+                    <option value="30-40" th:selected="${selectedSalaryRange == '30-40'}">30-40 triệu</option>
+                    <option value="40+" th:selected="${selectedSalaryRange == '40+'}">Trên 40 triệu</option>
+                    <option value="negotiable" th:selected="${selectedSalaryRange == 'negotiable'}">Thương lượng</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </form>
     </div>
 
     <!-- Danh sách công việc -->

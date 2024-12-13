@@ -3,6 +3,7 @@ package vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.controlle
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -51,11 +52,34 @@ public class JobController {
     private SkillService skillService;
 
     @GetMapping("")
-    public String showJobList(@RequestParam(value = "page", defaultValue = "0") int page,
-                               @RequestParam(value = "size", defaultValue = "10") int size,
-                               Model model) {
-        Page<Job> jobPage = jobService.getJobs(page, size);
+    public String showJobList(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String jobType,
+            @RequestParam(required = false) String salaryRange,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Model model) {
+        
+        // Thêm dữ liệu cho các dropdown
+        model.addAttribute("cities", jobService.getDistinctCities());
+        model.addAttribute("jobTypes", jobService.getDistinctJobTypes());
+        
+        // Thêm các tùy chọn lương
+        model.addAttribute("salaryRanges", Arrays.asList(
+            "0-10", "10-20", "20-30", "30-40", "40+", "negotiable"
+        ));
+
+        // Thực hiện tìm kiếm
+        Page<Job> jobPage = jobService.searchJobs(keyword, city, jobType, salaryRange, page, size);
+        
+        // Thêm kết quả và các tham số tìm kiếm vào model
         model.addAttribute("jobPage", jobPage);
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("selectedCity", city);
+        model.addAttribute("selectedJobType", jobType);
+        model.addAttribute("selectedSalaryRange", salaryRange);
+        
         return "jobs/job-list";
     }
 

@@ -3,6 +3,7 @@ package vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.repositor
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.CandidateApplyJob;
 import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.models.Job;
+import vn.edu.iud.fit.lehoangkhang.week08_lab05_lehoangkhang_21083791.enums.JobType;
 
 @Repository
 public interface JobRepository extends JpaRepository<Job, Long> {
@@ -42,4 +44,40 @@ long countExpiringJobs(@Param("companyId") Long companyId,
            "ORDER BY caj.applyDate DESC")
     List<CandidateApplyJob> findCandidateApplyJobsByJobId(Long jobId);
     List<Job> findTop6ByActiveOrderByStartDateDesc(boolean active);
+    @Query("SELECT DISTINCT j.company.address.city FROM Job j WHERE j.active = true ORDER BY j.company.address.city")
+    List<String> findDistinctCities();
+    @Query("SELECT DISTINCT j.type FROM Job j WHERE j.active = true ORDER BY j.type")
+    List<JobType> findDistinctJobTypes();
+    @Query(value = "SELECT j.* FROM job j " +
+           "JOIN company c ON j.company_id = c.id " +
+           "JOIN address a ON c.address_id = a.id " +
+           "WHERE j.active = true " +
+           "AND (:keyword IS NULL OR LOWER(j.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "    OR LOWER(j.description) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+           "AND (COALESCE(:city, '') = '' OR a.city = :city) " +
+           "AND (COALESCE(:jobType, '') = '' OR j.type = :jobType) " +
+           "AND (:minSalary IS NULL OR j.salary_from >= :minSalary) " +
+           "AND (:maxSalary IS NULL OR j.salary_to <= :maxSalary) " +
+           "AND (:negotiable IS NULL OR j.negotiable = :negotiable)",
+           countQuery = "SELECT COUNT(*) FROM job j " +
+           "JOIN company c ON j.company_id = c.id " +
+           "JOIN address a ON c.address_id = a.id " +
+           "WHERE j.active = true " +
+           "AND (:keyword IS NULL OR LOWER(j.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "    OR LOWER(j.description) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+           "AND (COALESCE(:city, '') = '' OR a.city = :city) " +
+           "AND (COALESCE(:jobType, '') = '' OR j.type = :jobType) " +
+           "AND (:minSalary IS NULL OR j.salary_from >= :minSalary) " +
+           "AND (:maxSalary IS NULL OR j.salary_to <= :maxSalary) " +
+           "AND (:negotiable IS NULL OR j.negotiable = :negotiable)",
+           nativeQuery = true)
+    Page<Job> searchJobs(
+        @Param("keyword") String keyword,
+        @Param("city") String city,
+        @Param("jobType") String jobType,
+        @Param("minSalary") Double minSalary,
+        @Param("maxSalary") Double maxSalary,
+        @Param("negotiable") Boolean negotiable,
+        Pageable pageable
+    );
 }
