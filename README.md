@@ -12,7 +12,7 @@ Người dùng web được chia làm 3 loại: Người dùng khách, ta
 - **Người dùng khách:** Có thể xem tin tuyển dụng, tìm kiếm việc làm, xem thông tin công ty, xem thống kê tình hình việc làm.
 - **Tài khoản ứng viên:** Có thể tìm kiếm việc làm, xem thông tin công ty, đăng tin tuyển dụng, được gợi ý việc làm phù hợp với các kĩ năng của bản thân, xem thống kê tình hình việc làm, cập nhật profile cá nhân, ứng tuyển tin tuyển dụng.
 - **Tài khoản doanh nghiệp:** Có thể đăng, cập nhật, xem tin tuyển dụng, xem thông tin ứng viên, xem thống kê tình hình việc làm, cập nhật profile công ty, xem thông tin ứng viên đã ứng tuyển tin tuyển dụng của công ty.
-<br>
+  <br>
 
 ### 1.2 Công nghệ sử dụng
 - **Backend**: Spring Boot (Java)
@@ -34,7 +34,7 @@ Người dùng web được chia làm 3 loại: Người dùng khách, ta
 ### 2.1 Yêu cầu hệ thống
 - **Java Development Kit (JDK)** phiên bản >= 17
 - **Công cụ build**: Gradle
-- **MariaDB** 
+- **MariaDB**
 - **IDE**: IntelliJ IDEA or Visual Studio Code
 - **Trình duyệt**: Chrome, Firefox, Safari, ...
 - **Hệ điều hành**: Windows, MacOS, Linux
@@ -46,22 +46,30 @@ Người dùng web được chia làm 3 loại: Người dùng khách, ta
     cd week08_lab05_leHoangKhang_21083791
     ```
 2. **Cấu hình cơ sở dữ liệu**:
-    - Mở file `application.properties`.
-    - Cập nhật thông tin kết nối database:
-        ```properties
-        spring.datasource.url=jdbc:mariadb://localhost:3306/candidate_db?createDatabaseIfNotExist=true
-        spring.datasource.username=root
-        spring.datasource.password=123456
-        ```
-3. **Chạy ứng dụng**: 
-    - Mở terminal và chạy lệnh:
-        ```bash
-        gradle bootRun
-        ```
-    - Hoặc chạy ứng dụng trên IDE.
+   - Mở file `application.properties`.
+   - Cập nhật thông tin kết nối database:
+       ```properties
+       spring.datasource.url=jdbc:mariadb://localhost:3306/candidate_db?createDatabaseIfNotExist=true
+       spring.datasource.username=root
+       spring.datasource.password=123456
+       ```
+3. **Chạy ứng dụng**:
+   - Mở terminal và chạy lệnh:
+       ```bash
+       gradle bootRun
+       ```
+   - Hoặc chạy ứng dụng trên IDE.
+     <br>(Chú ý: Cần xóa database có tên `candidate_db` trước khi chạy ứng dụng)
+     <br>Dữ liệu được khởi tạo tự động bằng file [DataInitializer.java](https://github.com/iamKhang/week08_lab05_leHoangKhang_21083791/blob/main/src/main/java/vn/edu/iud/fit/lehoangkhang/week08_lab05_lehoangkhang_21083791/utils/DataInitializer.java)
 4. **Truy cập ứng dụng**:
-    - Mở trình duyệt và truy cập [http://localhost:8080](http://localhost:8080).
-
+   - Mở trình duyệt và truy cập [http://localhost:8080](http://localhost:8080).
+   - Tài khoản demo:
+     - **Ứng viên:**
+       -   Email: iamhoangkhang@icloud.com
+       - Password: khang2003
+     - **Doanh nghiệp:**
+       - Email: fptsoftware@gmail.com
+       - Password: khang2003
 ---
 
 ## 3. Chức năng chính
