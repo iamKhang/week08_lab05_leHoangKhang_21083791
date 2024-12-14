@@ -45,6 +45,53 @@
             height: 64px;
             border-radius: 50%;
             object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .candidate-info {
+            flex: 1;
+            min-width: 0;
+            padding-right: 1.5rem;
+        }
+
+        .candidate-actions {
+            flex-shrink: 0;
+            width: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .candidate-actions .btn {
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        .candidate-actions p {
+            width: 100%;
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .candidate-skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            max-width: calc(100% - 1rem);
+        }
+
+        .candidate-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+        .candidate-contact {
+            margin: 0.5rem 0;
         }
 
         .skill-badge {
@@ -54,6 +101,32 @@
             border-radius: 20px;
             margin: 0.25rem;
             display: inline-block;
+        }
+
+        @media (max-width: 768px) {
+            .candidate-actions {
+                width: 150px;
+            }
+            
+            .candidate-info {
+                padding-right: 1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .d-flex {
+                flex-direction: column;
+            }
+            
+            .candidate-actions {
+                width: 100%;
+                margin-top: 1rem;
+                align-items: flex-start;
+            }
+            
+            .candidate-info {
+                padding-right: 0;
+            }
         }
     </style>
 </head>
@@ -130,24 +203,27 @@
                 <div th:if="${not #lists.isEmpty(applications)}" class="row">
                     <div th:each="jobApplication : ${applications}" class="candidate-card card">
                         <div class="card-body">
-                            <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-start">
                                 <img th:if="${jobApplication.candidate != null && jobApplication.candidate.avatarUrl != null}" 
                                      th:src="${jobApplication.candidate.avatarUrl}" 
                                      class="candidate-avatar me-3"
                                      th:onerror="this.src='/uploads/default_img.png'">
-                                <div class="flex-grow-1">
-                                    <h5 class="mb-1" th:text="${jobApplication.candidate != null ? jobApplication.candidate.fullName : 'N/A'}">
+                                
+                                <div class="candidate-info">
+                                    <h5 class="candidate-name" th:text="${jobApplication.candidate != null ? jobApplication.candidate.fullName : 'N/A'}">
                                         Candidate Name
                                     </h5>
-                                    <p class="mb-2 text-muted">
-                                        <i class="fas fa-envelope me-2"></i>
-                                        <span th:text="${jobApplication.candidate.email}">Email</span>
-                                    </p>
-                                    <p class="mb-2 text-muted">
-                                        <i class="fas fa-phone me-2"></i>
-                                        <span th:text="${jobApplication.candidate.phone}">Phone</span>
-                                    </p>
-                                    <div class="d-flex flex-wrap gap-2">
+                                    <div class="candidate-contact">
+                                        <p class="mb-1 text-muted">
+                                            <i class="fas fa-envelope me-2"></i>
+                                            <span th:text="${jobApplication.candidate.email}">Email</span>
+                                        </p>
+                                        <p class="mb-1 text-muted">
+                                            <i class="fas fa-phone me-2"></i>
+                                            <span th:text="${jobApplication.candidate.phone}">Phone</span>
+                                        </p>
+                                    </div>
+                                    <div class="candidate-skills">
                                         <span class="badge bg-light text-dark" 
                                               th:each="skill : ${jobApplication.candidate.candidateSkills}"
                                               th:text="${skill.skill.skillName + ' (' + skill.skillLevel + ')'}">
@@ -155,7 +231,8 @@
                                         </span>
                                     </div>
                                 </div>
-                                <div class="text-end">
+                                
+                                <div class="candidate-actions">
                                     <p class="text-muted mb-2">
                                         <i class="fas fa-calendar me-1"></i>
                                         Ứng tuyển: <span th:text="${#temporals.format(jobApplication.applyDate, 'dd/MM/yyyy')}">Date</span>
